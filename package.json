@@ -1,0 +1,23 @@
+{
+  "name": "vector-power-defense",
+  "version": "0.0.0",
+  "description": "Server and client code for the epic CS 252 tower defense project.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maxattax97/vector-power-defense.git"
+  },
+  "author": "",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/Maxattax97/vector-power-defense/issues"
+  },
+  "homepage": "https://github.com/Maxattax97/vector-power-defense#readme",
+  "devDependencies": {
+    "eslint": "^4.10.0"
+  }
+}
