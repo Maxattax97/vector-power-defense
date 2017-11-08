@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
+    "lint-fix": "eslint . --fix",
     "build": "gulp build",
     "watch": "gulp build watch",
     "serve": "gulp serve",
