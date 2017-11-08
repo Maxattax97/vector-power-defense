@@ -5,22 +5,32 @@ Server and client code for the epic CS 252 tower defense project.
 
 ## setup
 
+Required programs
+
  * npm 5.5.1+
  * node 8.6.0+
+
+After running
 
 ```
 npm install
 ```
 
+Options
+
+```
+export PORT=3000
+```
+
 ## error
 
-Error:
+Error
 
 ```
 Error: listen EADDRINUSE :::3000
 ```
 
-Solution:
+Solution
 
 ```
 $ sudo lsof -i | grep 3000
