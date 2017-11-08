@@ -25,6 +25,7 @@
     "browserify": "^14.5.0",
     "eslint": "^4.10.0",
     "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
     "gulp-serve": "^1.4.0",
     "gulp-watch": "^4.3.11",
     "vinyl-source-stream": "^1.1.0"
