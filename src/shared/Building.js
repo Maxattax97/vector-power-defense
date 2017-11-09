@@ -43,10 +43,18 @@ class OffenseTower extends Building
 class DefenseTower extends Building
 {
     var baseDamage;
+    var baseRate;
     var baseRange;
+    var priority; // Closest to tower, lowest health, etc.
 
-    // Deals damage based on the tower's stats
-    damage(creep)
+    // Calculate straight line distance from tower to a creep
+    distanceFrom(creep)
+    {
+
+    }
+
+    // Deals damage to one creep based on the tower's stats
+    attack(creepList)
     {
 
     }
