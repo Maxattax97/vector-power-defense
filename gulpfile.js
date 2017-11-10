@@ -1,12 +1,12 @@
 const gulp = require('./gulp')([
-  'build-html',
-  'build-js',
-  'watch-html',
-  'watch-js',
-  'watch-serve',
-  'serve',
-  'lint',
-  'watch-lint',
+    'build-html',
+    'build-js',
+    'watch-html',
+    'watch-js',
+    'watch-serve',
+    'serve',
+    'lint',
+    'watch-lint',
 ]);
 
 gulp.task('build', ['build-html', 'build-js']);
