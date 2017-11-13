@@ -5,7 +5,7 @@ class Tile
     /*
     Integer xposition
     Integer yposition
-    Integer tileColor
+    String tileColor
     Integer sideLength
     Boolean isWalkable
     Boolean isBuildable
@@ -18,7 +18,7 @@ class Tile
         this.tileColor = color;
         this.isWalkable = walkable;
         this.isBuildable = buildable;
-        this.sideLength = 10; // Constant value for size of each tile, use same units as creep size
+        this.sideLength = 1; // Constant value for size of each tile, use same units as creep size
     }
 }
 
