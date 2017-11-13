@@ -26,7 +26,7 @@ class OffenseTower extends Building
 {
     /*
     Creep creepType
-    Float bossMultiplier <-- = 1 if normal creep, > 1 if boss creep 
+    Float bossMultiplier <-- = 1 if normal creep, > 1 if boss creep
     */
 
     constructor(xpos, ypos, type)
@@ -125,10 +125,10 @@ class PowerNode extends Building
         super(xpos, ypos, type);
         this.currHealth = health;
         this.maxHealth = health;
-        calculateIncome();
+        this.calculateIncome();
     }
 
-    // Calculates the base income of the node using factors such as 
+    // Calculates the base income of the node using factors such as
     // number of players, type of node, etc.
     calculateIncome()
     {
@@ -143,7 +143,7 @@ class PowerNode extends Building
 
     upgrade()
     {
-        super.upgrade
+        super.upgrade;
     }
 }
 
