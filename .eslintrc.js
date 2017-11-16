@@ -29,8 +29,13 @@ module.exports = {
             "always-multiline",
         ],
         "no-console": "off",
-        "space-after-keywords": "always",
-        "space-before-function-name": "always",
+        "keyword-spacing": [
+            "error",
+            {
+                "before": true,
+                "after": true,
+            },
+        ],
         "eqeqeq": [
             "error",
             "smart",
