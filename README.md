@@ -35,6 +35,8 @@ node       <pid> <user>   12u  IPv6 456384      0t0  TCP *:3000 (LISTEN)
 $ kill <pid>
 ```
 
+oneline: `kill $(lsof -i | grep 3000 | awk '{print $2}')`
+
 Error: Gulp crashes with an `ENOSPC` error.
 
 Solution: [Increase OS's maximum file watchers](https://stackoverflow.com/questions/16748737/grunt-watch-error-waiting-fatal-error-watch-enospc)
