@@ -35,7 +35,7 @@ class Creep
         this.baseDamage = 1;
         this.baseRange = 1;
 
-        switch(this.creepType)
+        switch (this.creepType)
         {
             // Basic creep
             case "Creeper":

@@ -1,3 +1,6 @@
+
+const Tile = require("./Tile");
+
 class World
 {
     /*
@@ -6,6 +9,10 @@ class World
     Creep[] creeps
     */
 
+    /*
+    Integer xsize
+    Integer ysize
+    */
     constructor(xsize, ysize)
     {
         this.map = [];
