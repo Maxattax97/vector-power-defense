@@ -10,6 +10,6 @@ const gulp = require("./gulp")([
 ]);
 
 gulp.task("build", ["build-html", "build-js"]);
-gulp.task("watch", ["watch-html", "watch-js"]);
+gulp.task("watch", ["build-html", "watch-html", "watch-js"]);
 
-gulp.task("default", ["build", "watch", "serve", "watch-serve"]);
+gulp.task("default", ["watch", "serve", "watch-serve"]);
