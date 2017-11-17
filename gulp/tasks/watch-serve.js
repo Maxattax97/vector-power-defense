@@ -7,6 +7,7 @@ const glob = [
 ];
 
 module.exports = function() {
+    gulp.start("serve");
     return watch(glob, function() {
         gulp.start("serve");
     });

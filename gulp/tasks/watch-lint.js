@@ -9,6 +9,7 @@ const glob = [
 ];
 
 module.exports = function() {
+    gulp.start("lint");
     return watch(glob, function() {
         gulp.start("lint");
     });
