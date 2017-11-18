@@ -1,6 +1,6 @@
 
 const paper = require("paper");
-const {Point, Path, Group} = paper;
+const {Point, Path, Color, Group} = paper;
 const settings = {
     squareSize: 50,
     borderSize: 1,
@@ -55,9 +55,13 @@ function positionTower(tower, xpos, ypos) {
     tower.position = new Point(x, y);
 }
 
-function shootBetween(a, b) {
+function shootBetween(a, b, color) {
+    if (color === undefined) {
+        color = a.strokeColor;
+    }
+
     const path = new Path(a.position, b.position);
-    path.strokeColor = a.strokeColor;
+    path.strokeColor = color;
 
     path.onFrame = function(event) {
         path.strokeColor.alpha -= 1 * event.delta;
@@ -65,6 +69,22 @@ function shootBetween(a, b) {
             path.remove();
         }
     };
+}
+
+function shootSplash(a, b, items, splashRange) {
+    shootBetween(a, b);
+
+    const actualSplashRange = splashRange * settings.squareSize;
+
+    const splashColor = new Color(a.strokeColor);
+    splashColor.alpha *= 2/3;
+
+    for (var i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (b.position.subtract(item.position).length < actualSplashRange) {
+            shootBetween(b, item, splashColor);
+        }
+    }
 }
 
 function render() {
@@ -109,7 +129,9 @@ function render() {
         }
     }
 
+    const items = [].concat.apply([], towers);
     shootBetween(basicTowers[0], basicTowers[1]);
+    shootSplash(airTowers[0], earthTowers[4], items, 1.5);
 }
 
 module.exports = render;
