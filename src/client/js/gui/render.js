@@ -7,19 +7,9 @@ const settings = {
 };
 
 settings.buildingSize = settings.squareSize - settings.borderSize * 2;
+settings.buildingSize = Math.floor(settings.buildingSize / 2) * 2 - 1;
 
-// function create() {
-//
-// }
-
-function createBasicTower() {
-    const radius = settings.buildingSize / 2;
-    const circle = new Path.Circle(new Point(0, 0), radius);
-    circle.strokeColor = "#383838";
-    return circle;
-}
-
-function createAirTower(level) {
+function createTower(level, color) {
     const l = settings.buildingSize;
     const baseRotateDelta = 45;
     const rotateDelta = baseRotateDelta + 10 * level;
@@ -27,8 +17,7 @@ function createAirTower(level) {
     const children = [];
 
     const circle = new Path.Circle(new Point(0, 0), l/2);
-    circle.strokeColor = "#73dafe";
-    circle.fillColor = "#ffffff";
+    circle.strokeColor = color;
     children.push(circle);
 
     const outline = new Path.RegularPolygon(new Point(0, 0), level, l/4);
@@ -42,7 +31,7 @@ function createAirTower(level) {
 
     vertices.forEach((vertex) => {
         const triangle = new Path.RegularPolygon(vertex, 3, triangleSideLength);
-        triangle.fillColor = "#73dafe";
+        triangle.fillColor = color;
 
         triangle.rotate(vertex.angle - 90, vertex);
 
@@ -67,14 +56,45 @@ function positionTower(tower, xpos, ypos) {
 }
 
 function render() {
-    const basicTower = createBasicTower();
-    positionTower(basicTower, 0, 0);
+    var rect = new Path.Rectangle({
+        point: [0, 0],
+        size: [paper.view.size.width, paper.view.size.height],
+        strokeColor: 'black',
+        fillColor: '#000000',
+        selected: true,
+    });
+    rect.sendToBack();
 
+    const basicTowers = [];
     const airTowers = [];
-    for (let i = 0; i <= 4; i++) {
-        const airTower = createAirTower(i);
-        positionTower(airTower, 1 + i, 0);
-        airTowers.push(airTower);
+    const waterTowers = [];
+    const earthTowers = [];
+    const fireTowers = [];
+
+    const towers = [
+        basicTowers,
+        airTowers,
+        waterTowers,
+        earthTowers,
+        fireTowers,
+    ];
+
+    const colors = [
+        "#eeeeee",
+        "#8ffcff",
+        "#4d4dff",
+        "#fd5f00",
+        "#dd0048",
+    ];
+
+    for (let type = 0; type < colors.length; type++) {
+        const moreTowers = towers[type];
+        const color = colors[type];
+        for (let level = 0; level <= 4; level++) {
+            const tower = createTower(level, color);
+            positionTower(tower, level, type);
+            moreTowers.push(tower);
+        }
     }
 }
 
