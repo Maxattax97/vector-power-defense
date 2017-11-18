@@ -55,6 +55,18 @@ function positionTower(tower, xpos, ypos) {
     tower.position = new Point(x, y);
 }
 
+function shootBetween(a, b) {
+    const path = new Path(a.position, b.position);
+    path.strokeColor = a.strokeColor;
+
+    path.onFrame = function(event) {
+        path.strokeColor.alpha -= 1 * event.delta;
+        if (path.strokeColor.alpha <= 0) {
+            path.remove();
+        }
+    };
+}
+
 function render() {
     var rect = new Path.Rectangle({
         point: [0, 0],
@@ -96,6 +108,8 @@ function render() {
             moreTowers.push(tower);
         }
     }
+
+    shootBetween(basicTowers[0], basicTowers[1]);
 }
 
 module.exports = render;
