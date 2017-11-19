@@ -19,13 +19,50 @@ class Player
 
     purchaseBuilding(xpos, ypos, type)
     {
+        var cost;
         if (type.indexOf("Tower") !== -1)
         {
-            this.buildings.push(new DefenseTower(xpos, ypos, type));
+            switch (type)
+            {
+                case "BasicTower":
+                    cost = 100;
+                    break;
+                case "AirTower":
+                    cost = 150;
+                    break;
+                case "WaterTower":
+                    cost = 200;
+                    break;
+                case "EartTower":
+                    cost = 250;
+                    break;
+                case "FireTower":
+                    cost = 500;
+                    break;
+            }
+            this.buildings.push(new DefenseTower(xpos, ypos, type, cost));
         }
         else if (type.indexOf("Spawn") !== -1)
         {
-            this.buildings.push(new OffenseTower(xpos, ypos, type));
+            switch (type)
+            {
+                case "BasicTower":
+                    cost = 100;
+                    break;
+                case "AirTower":
+                    cost = 150;
+                    break;
+                case "WaterTower":
+                    cost = 200;
+                    break;
+                case "EartTower":
+                    cost = 250;
+                    break;
+                case "FireTower":
+                    cost = 500;
+                    break;
+            }
+            this.buildings.push(new OffenseTower(xpos, ypos, type, cost));
         }
         else
         {
