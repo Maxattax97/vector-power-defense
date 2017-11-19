@@ -27,7 +27,7 @@ class PowerNode extends Building
     // Generates income
     generate()
     {
-
+        
     }
 
     upgrade()

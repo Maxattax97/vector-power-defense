@@ -1,41 +1,41 @@
+const SocketServer = require("ws").Server;
 const express = require("express");
+//const World = require("../shared/World");
 const app = express();
 
-const port = process.env.PORT || 3000;
+// Lists of all game objects
+/*
+var creeps = [];
+var defenseTowers = [];
+var offenseTowers = [];
+var powerNodes = [];
+var playerList = [];
+
+//init Express Router
+var router = express.Router();
+*/
 
 app.use(express.static("public"));
-app.listen(port);
 
-const net = require("net");
+const port = process.env.PORT || 3000;
+const server = app.listen(port);
+const wss = new SocketServer({ server });
 
-var socket = net.createConnection();
-
-// Start a server to accept connections
-var server = net.createServer(function(socket)
+wss.on("connection", function connection(ws)
 {
-    socket.write("Server connected\r\n");
-    socket.pipe(socket);
-    server.maxConnections = 5;
-});
+    console.log("connection ...");
 
-server.listen(port, "127.0.0.1");
-
-// Wait for five connections before starting game
-socket.on("connection",
-{
-    server.getConnections(initiateGame)
+    ws.on("message", function incoming(message)
     {
-        if(count === server.maxConnections)
-        {
-            callback(initiateGame(err, count));
-        }
-    }
+        console.log("received: %s", message);
+    });
+
+    ws.send("message from server at: " + new Date());
 });
 
-const LENGTH = 1920;
-const HEIGHT = 1080;
-
+/*
 function initiateGame(err, count)
 {
-    var world = new World(LENGTH, HEIGHT);
+
 }
+*/
