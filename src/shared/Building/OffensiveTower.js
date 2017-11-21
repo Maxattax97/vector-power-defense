@@ -8,9 +8,9 @@ class OffenseTower extends Building
     Float bossMultiplier <-- = 1 if normal creep, > 1 if boss creep
     */
 
-    constructor(xpos, ypos, type)
+    constructor(xpos, ypos, type, cost)
     {
-        super(xpos, ypos, type);
+        super(xpos, ypos, type, cost);
         switch (type)
         {
             case "CreeperSpawn":
@@ -32,9 +32,9 @@ class OffenseTower extends Building
 
     }
 
-    upgrade()
+    upgrade(resources)
     {
-        super.upgrade();
+        super.upgrade(resources);
     }
 }
 

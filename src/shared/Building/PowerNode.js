@@ -9,30 +9,24 @@ class PowerNode extends Building
     Integer maxHealth
     */
 
-    constructor(xpos, ypos, type, health)
+    constructor(xpos, ypos, type, cost, health, numPlayers)
     {
-        super(xpos, ypos, type);
+        super(xpos, ypos, type, cost);
         this.currHealth = health;
         this.maxHealth = health;
-        this.calculateIncome();
+        this.baseIncome = 100/numPlayers;
     }
 
-    // Calculates the base income of the node using factors such as
-    // number of players, type of node, etc.
-    calculateIncome()
-    {
 
+    // Use PowerNode.income for obtaining the income of each node
+    get income()
+    {
+        return (this.baseIncome * (1 + (this.buildingLevel * 0.2)));
     }
 
-    // Generates income
-    generate()
+    upgrade(resources)
     {
-
-    }
-
-    upgrade()
-    {
-        super.upgrade;
+        super.upgrade(resources);
     }
 }
 
