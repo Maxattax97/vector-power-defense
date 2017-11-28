@@ -1,5 +1,8 @@
 public
 
+*.swp
+*.swo
+
 # Logs
 logs
 *.log
