@@ -108,7 +108,7 @@ class DefenseTower extends Building
 
     upgrade(resources)
     {
-        super.upgrade(resources);
+        return super.upgrade(resources);
     }
 }
 

@@ -40,29 +40,37 @@ class Player
                     cost = 500;
                     break;
             }
-            this.buildings.push(new DefenseTower(xpos, ypos, type, cost));
+            if (this.resources >= cost)
+            {
+                this.resources -= cost;
+                this.buildings.push(new DefenseTower(xpos, ypos, type, cost));
+            }
         }
         else if (type.indexOf("Spawn") !== -1)
         {
             switch (type)
             {
-                case "BasicTower":
+                case "CreeperSpawn":
                     cost = 100;
                     break;
-                case "AirTower":
-                    cost = 150;
-                    break;
-                case "WaterTower":
+                case "QuicksterSpawn":
                     cost = 200;
                     break;
-                case "EartTower":
+                case "SwarmieSpawn":
+                    cost = 200;
+                    break;
+                case "RotundoSpawn":
                     cost = 250;
                     break;
-                case "FireTower":
-                    cost = 500;
+                case "MassimoSpawn":
+                    cost = 300;
                     break;
             }
-            this.buildings.push(new OffenseTower(xpos, ypos, type, cost));
+            if (this.resources >= cost)
+            {
+                this.resources -= cost;
+                this.buildings.push(new OffenseTower(xpos, ypos, type, cost));
+            }
         }
         else
         {
