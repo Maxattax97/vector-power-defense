@@ -82,7 +82,7 @@ class DefenseTower extends Building
     distanceFrom(creep)
     {
         // Pythagorean theorem.
-        return Math.sqrt(Math.exp(this.xpos - creep.xpos, 2) + Math.exp(this.ypos - creep.ypos, 2));
+        return Math.sqrt(Math.pow(this.xpos - creep.xpos, 2) + Math.pow(this.ypos - creep.ypos, 2));
     }
 
     // Deals damage to one creep based on the tower's stats

@@ -17,6 +17,7 @@ class Creep
     Integer baseRange
     Float multRange
     Integer baseBounty
+    Boolean isDead
     */
 
     // Build creep
@@ -85,7 +86,7 @@ class Creep
     // Function to begin death sequence and eventual removal
     perish()
     {
-
+        this.isDead = true;
     }
 }
 

@@ -20,15 +20,18 @@ class Player
     Integer resources
     Building[] buildings
     PowerNode powerNode
+    Boolean isDefense
     */
 
-    constructor(xpos, ypos, isDefense)
+    constructor(xpos, ypos, isDefense, numDefenders)
     {
         this.resources = 0;
+        this.buildings = [];
         if (isDefense)
         {
-            this.powerNode = new PowerNode(xpos, ypos, "PowerNode", 100);
+            this.powerNode = new PowerNode(xpos, ypos, numDefenders);
         }
+        this.isDefense = isDefense;
     }
 
     purchaseBuilding(xpos, ypos, type)

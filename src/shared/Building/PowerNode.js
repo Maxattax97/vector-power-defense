@@ -9,12 +9,12 @@ class PowerNode extends Building
     Integer maxHealth
     */
 
-    constructor(xpos, ypos, type, cost, health, numPlayers)
+    constructor(xpos, ypos, numDefenders)
     {
-        super(xpos, ypos, type, cost);
-        this.currHealth = health;
-        this.maxHealth = health;
-        this.baseIncome = 100/numPlayers;
+        super(xpos, ypos, "PowerNode", 100);
+        this.currHealth = 100;
+        this.maxHealth = 100;
+        this.baseIncome = 100/numDefenders;
     }
 
 
