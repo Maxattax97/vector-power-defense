@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const SocketServer = require("ws").Server;
 const express = require("express");
 //const World = require("../shared/World");
