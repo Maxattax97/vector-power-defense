@@ -5,17 +5,14 @@ const Player = require("./Player");
 class World
 {
     /*
+    Integer xsize
+    Integer ysize
     Tiles[][] map
     Player offensePlayer
     Player[] defensePlayers
     Building[] buildings
     PowerNode[] nodes
     Creep[] creeps
-    */
-
-    /*
-    Integer xsize
-    Integer ysize
     */
     constructor(xsize, ysize, numDefenders)
     {
@@ -30,28 +27,28 @@ class World
                 this.map[x][y] = new Tile(x, y, "#444444", true, true);
             }
         }
-        this.offensePlayer = new Player(xsize/2, ysize/2, false, 0);
+        this.offensePlayer = new Player(xsize/2, ysize/2, this, false, 0);
         if (numDefenders >= 1)
         {
-            this.defensePlayers.push(new Player(xsize/16, ysize/16, true, numDefenders));
+            this.defensePlayers.push(new Player(xsize/16, ysize/16, this, true, numDefenders));
             this.buildings.push(this.defensePlayers[0].powerNode);
             this.nodes.push(this.defensePlayers[0].powerNode);
         }
         if (numDefenders >= 2)
         {
-            this.defensePlayers.push(new Player(xsize/16, ysize*15/16, true, numDefenders));
+            this.defensePlayers.push(new Player(xsize/16, ysize*15/16, this, true, numDefenders));
             this.buildings.push(this.defensePlayers[1].powerNode);
             this.nodes.push(this.defensePlayers[1].powerNode);
         }
         if (numDefenders >= 3)
         {
-            this.defensePlayers.push(new Player(xsize*15/16, ysize/16, true, numDefenders));
+            this.defensePlayers.push(new Player(xsize*15/16, ysize/16, this, true, numDefenders));
             this.buildings.push(this.defensePlayers[2].powerNode);
             this.nodes.push(this.defensePlayers[2].powerNode);
         }
         if (numDefenders === 4)
         {
-            this.defensePlayers.push(new Player(xsize*15/16, ysize*15/16, true, numDefenders));
+            this.defensePlayers.push(new Player(xsize*15/16, ysize*15/16, this, true, numDefenders));
             this.buildings.push(this.defensePlayers[3].powerNode);
             this.nodes.push(this.defensePlayers[3].powerNode);
         }

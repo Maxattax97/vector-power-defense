@@ -9,9 +9,9 @@ class PowerNode extends Building
     Integer maxHealth
     */
 
-    constructor(xpos, ypos, numDefenders)
+    constructor(xpos, ypos, world, numDefenders)
     {
-        super(xpos, ypos, "PowerNode", 100);
+        super(xpos, ypos, "PowerNode", 100, world);
         this.currHealth = 100;
         this.maxHealth = 100;
         this.baseIncome = 100/numDefenders;
@@ -22,11 +22,6 @@ class PowerNode extends Building
     get income()
     {
         return (this.baseIncome * (1 + (this.buildingLevel * 0.2)));
-    }
-
-    upgrade(resources)
-    {
-        super.upgrade(resources);
     }
 }
 

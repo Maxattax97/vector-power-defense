@@ -17,19 +17,21 @@ const MASSCOST = 300;
 class Player
 {
     /*
-    Integer resources
-    Building[] buildings
-    PowerNode powerNode
-    Boolean isDefense
+    Integer resources       :: Amount of money that the player has.
+    Building[] buildings    :: List of buildings owned by the player.
+    PowerNode powerNode     :: Power node owned by the player.
+    Boolean isDefense       :: Whether the player is a defender or not.
+    World world             :: World instance that player is playing with.
     */
 
-    constructor(xpos, ypos, isDefense, numDefenders)
+    constructor(xpos, ypos, world, isDefense, numDefenders)
     {
         this.resources = 0;
         this.buildings = [];
+        this.world = world;
         if (isDefense)
         {
-            this.powerNode = new PowerNode(xpos, ypos, numDefenders);
+            this.powerNode = new PowerNode(xpos, ypos, this.world, numDefenders);
         }
         this.isDefense = isDefense;
     }
@@ -60,7 +62,7 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                this.buildings.push(new DefenseTower(xpos, ypos, type, cost));
+                this.buildings.push(new DefenseTower(xpos, ypos, type, cost, this.world));
             }
         }
         else if (type.indexOf("Spawn") !== -1)
@@ -86,7 +88,7 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                this.buildings.push(new OffenseTower(xpos, ypos, type, cost));
+                this.buildings.push(new OffenseTower(xpos, ypos, type, cost, this.world));
             }
         }
         if (cost === 0)
@@ -161,6 +163,16 @@ class Player
         }
         this.buildings.splice(pblock, pblock + 1);
         this.resources += value;
+    }
+
+    upgradeBuilding(building)
+    {
+        this.resources = building.upgrade(this.resources);
+    }
+
+    promoteSpawner(spawner)
+    {
+        this.resources = spawner.promote(this.resources);
     }
 }
 

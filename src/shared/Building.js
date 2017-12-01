@@ -5,21 +5,24 @@ class Building
     /*
     Integer xposition
     Integer yposition
-    Integer buildingLevel
-    String buildingType
-    Integer currHealth
-    Integer maxHealth
-    Integer upgradeCost
-    Integer totalValue
+    Integer buildingLevel   :: Level for building, for tower and creep stat growth. Starts at 0.
+    String buildingType     :: Type of building. See switch cases in each subclass's constructor.
+    Integer upgradeCost     :: Cost for next buildingLevel to be reached.
+    Integer totalValue      :: Sum of cost for purchase and all previous upgrades.
+    Boolean isCollapsed     :: Indicates building should be rendered as being destroyed
+    World world             :: World instance containing the building
     */
 
-    constructor(xpos, ypos, type, cost)
+    constructor(xpos, ypos, type, cost, world)
     {
         this.xposition = xpos;
         this.yposition = ypos;
         this.buildingType = type;
         this.upgradeCost = cost/2;
         this.totalValue = cost;
+        this.buildingLevel = 0;
+        this.isCollapsed = false;
+        this.world = world;
     }
 
     upgrade(resources)
@@ -36,7 +39,7 @@ class Building
 
     collapse()
     {
-
+        this.isCollapsed = true;
     }
 }
 

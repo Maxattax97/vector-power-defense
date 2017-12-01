@@ -13,11 +13,14 @@ class DefenseTower extends Building
     Integer baseSplash
     Float multSplash
     String priority
+
+    NOTE: Base stats are the stats for a level 0 building, multipliers are used
+    with base stats to calculate stats for higher levels
     */
 
-    constructor(xpos, ypos, type, cost)
+    constructor(xpos, ypos, type, cost, world)
     {
-        super(xpos, ypos, type, cost);
+        super(xpos, ypos, type, cost, world);
 
         this.baseDamage = 1;
         this.multDamage = 0.25;
@@ -63,16 +66,19 @@ class DefenseTower extends Building
         }
     }
 
+    // Damage dealt by tower after level factors in
     get damage()
     {
         return (this.baseDamage * (1 + (this.buildingLevel * this.multDamage)));
     }
 
+    // Fire rate of tower after level factors in
     get rate()
     {
         return (this.baseRate * (1 + (this.buildingLevel * this.multRate)));
     }
 
+    // Range of tower after level factors in
     get range()
     {
         return (this.baseRange * (1 + (this.buildingLevel * this.multDamage)));
@@ -104,11 +110,6 @@ class DefenseTower extends Building
                 minCreep.perish();
             }
         }
-    }
-
-    upgrade(resources)
-    {
-        return super.upgrade(resources);
     }
 }
 
