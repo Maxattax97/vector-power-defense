@@ -4,16 +4,11 @@ const express = require("express");
 const app = express();
 
 // Lists of all game objects
-/*
 var creeps = [];
-var defenseTowers = [];
-var offenseTowers = [];
-var powerNodes = [];
-var playerList = [];
+var buildings = [];
 
 //init Express Router
-var router = express.Router();
-*/
+//var router = express.Router();
 
 app.use(express.static("public"));
 
@@ -27,12 +22,55 @@ wss.on("connection", function connection(ws)
 
     ws.on("message", function incoming(message)
     {
-        console.log("received: %s", message);
+        var response = updateObjects(message);
+        ws.send(response);
     });
 
-    ws.send("message from server at: " + new Date());
+    //ws.send("message from server at: " + new Date());
 });
 
+// Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
+function updateObjects(message)
+{
+    var changes = JSON.parse(message.data);
+    var i;
+    var creep;
+    var building;
+    for (building in changes.newBuildings)
+    {
+        buildings.push(building);
+    }
+    for (building in changes.removedBuilding)
+    {
+        for (i = 0; i < buildings.length; i++)
+        {
+            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+            {
+                buildings.splice(i, i+1);
+                break;
+            }
+        }
+    }
+    for (creep in changes.newCreeps)
+    {
+        creeps.push(creep);
+    }
+    for (creep in changes.removedCreeps)
+    {
+        for (i = 0; i < creeps.length; i++)
+        {
+            if (creeps[i].xposition === creep.xposition && creeps[i].yposition === creep.yposition)
+            {
+                creeps.splice(i, i+1);
+                break;
+            }
+        }
+    }
+    var objects;
+    objects.Creeps = creeps;
+    objects.Buildings = buildings;
+    return JSON.stringify(objects);
+}
 /*
 function initiateGame(err, count)
 {
