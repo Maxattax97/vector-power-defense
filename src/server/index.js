@@ -1,5 +1,7 @@
 const SocketServer = require("ws").Server;
 const express = require("express");
+const bodyParser = require("body-parser");
+const path = require("path");
 //const World = require("../shared/World");
 const app = express();
 
@@ -17,7 +19,9 @@ var router = express.Router();
 
 app.use(express.static("public"));
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 27001;
+var publicHtmlDir = __dirname + "/../client/";
+
 const server = app.listen(port);
 const wss = new SocketServer({ server });
 
@@ -33,33 +37,28 @@ wss.on("connection", function connection(ws)
     ws.send("message from server at: " + new Date());
 });
 
-/*
-function initiateGame(err, count)
-{
-var bodyParser = require("body-parser");
-var express = require("express");
-var app = express();
-
-var port = process.env.PORT || 3000;
-var publicHtmlDir = __dirname + "/../client/"
-
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true,
 }));
 
-// Probably a bad idea... HTTPS.
-app.get("/", function(req, res) {
-    // Check for cookie, if no cookie respond with login.
-    console.log(req.headers, req.header);
-    res.sendFile(publicHtmlDir + "login.html");
-});
+// Probably a bad idea... needs HTTPS.
 
+console.log(path.resolve(publicHtmlDir + "game.html"));
 app.post("/auth", function(req, res) {
-    console.log(req.body);
-    res.send("Received a POST request at /auth");
+    // Check for cookie, if no cookie respond with login.
+    console.log("Received a POST request at /auth");
+    console.log(req.headers, req.header);
+    res.sendFile(path.resolve(publicHtmlDir + "game.html"));
+    // Redirect to game lobby.
 });
 
-}
-*/
+app.get("/game", function(req, res) {
+    res.sendFile(path.resolve(publicHtmlDir + "game.html"));
+});
+
+app.get("/", function(req, res) {
+    res.sendFile(path.resolve(publicHtmlDir + "login.html"));
+});
+

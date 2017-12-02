@@ -39,6 +39,6 @@
   },
   "optionalDependencies": {
     "node-mac": "^0.1.8",
-    "body-parser": "^1.18.2",
+    "body-parser": "^1.18.2"
   }
 }
