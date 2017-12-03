@@ -6,6 +6,7 @@ const app = express();
 // Lists of all game objects
 var creeps = [];
 var buildings = [];
+var numConnections = 0;
 
 //init Express Router
 //var router = express.Router();
@@ -19,15 +20,62 @@ const wss = new SocketServer({ server });
 wss.on("connection", function connection(ws)
 {
     console.log("connection ...");
+    var currConnections = ++numConnections;
+    if (numConnections > 5)
+    {
+        ws.deny = true;
+    }
 
     ws.on("message", function incoming(message)
     {
-        var response = updateObjects(message);
+        var response;
+        if (message === "Assign Player")
+        {
+            response = initializePlayer(currConnections);
+        }
+        else
+        {
+            response = updateObjects(message);
+        }
         ws.send(response);
     });
 
     //ws.send("message from server at: " + new Date());
 });
+
+function initializePlayer(currConnections)
+{
+    var playerInfo;
+    playerInfo.isDefense = true;
+    playerInfo.playerInfo = true;
+    playerInfo.play = false;
+    switch (currConnections)
+    {
+        case 1:
+            playerInfo.isDefense = false;
+            playerInfo.xpos = 1/2;
+            playerInfo.ypos = 1/2;
+            break;
+        case 2:
+            playerInfo.xpos = 1/16;
+            playerInfo.ypos = 1/16;
+            break;
+        case 3:
+            playerInfo.xpos = 15/16;
+            playerInfo.ypos = 1/16;
+            break;
+        case 4:
+            playerInfo.xpos = 1/16;
+            playerInfo.ypos = 15/16;
+            break;
+        case 5:
+            playerInfo.xpos = 15/16;
+            playerInfo.ypos = 15/16;
+            playerInfo.play = true;
+            break;
+    }
+    return JSON.stringify(playerInfo);
+}
 
 // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
 function updateObjects(message)
@@ -67,6 +115,8 @@ function updateObjects(message)
         }
     }
     var objects;
+    objects.playerInfo = false;
+    objects.play = true;
     objects.Creeps = creeps;
     objects.Buildings = buildings;
     return JSON.stringify(objects);
