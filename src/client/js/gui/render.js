@@ -119,10 +119,10 @@ function render(world) {
         "#dd0048",
     ];
 
-    for(var building in world.buildings)
+    for (var building in world.buildings)
     {
         var color;
-        switch(world.buildings.buildingType)
+        switch (world.buildings.buildingType)
         {
             case "BasicTower":
                 color = colors[0];

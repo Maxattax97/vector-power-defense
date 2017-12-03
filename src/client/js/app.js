@@ -130,7 +130,7 @@ window.addEventLister("click", function(e){
             {
                 building.addEventListener("click", sellListener(e));
                 building.addEventListener("click", upgradeListener(e));
-                if(!player.isDefense)
+                if (!player.isDefense)
                 {
                     building.addEventListener("click", promoteListener(e));
                 }
@@ -208,10 +208,12 @@ function promoteListener(e)
         }
         while (tick > 0)
         {
+            var creep;
+            var tower;
+            var spawner;
+            var target;
             if (player.isDefense)
             {
-                var tower;
-                var target;
                 for (tower in player.buildings)
                 {
                     target = tower.attack(world.creeps);
@@ -224,16 +226,18 @@ function promoteListener(e)
             }
             else
             {
-                var spawner;
                 for (spawner in player.buildings)
                 {
-                    var creep;
                     for (creep in spawner.spawn)
                     {
                         newCreeps.push(creep);
                         world.addCreep(creep);
                     }
                 }
+            }
+            for (creep in world.creeps)
+            {
+                creep.move();
             }
             tick--;
         }
