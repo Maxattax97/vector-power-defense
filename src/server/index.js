@@ -1,6 +1,11 @@
 const SocketServer = require("ws").Server;
 const express = require("express");
-//const World = require("../shared/World");
+const bodyParser = require("body-parser");
+const http = require("http");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
+const helmet = require("helmet");
 const app = express();
 
 // Lists of all game objects
@@ -11,11 +16,40 @@ var numConnections = 0;
 //init Express Router
 //var router = express.Router();
 
-app.use(express.static("public"));
+const credentials = {
+    key: fs.readFileSync(__dirname + "/security/privateKey.pem").toString(),
+    cert: fs.readFileSync(__dirname + "/security/certificate.pem").toString(),
+};
 
-const port = process.env.PORT || 3000;
-const server = app.listen(port);
-const wss = new SocketServer({ server });
+app.use(express.static("public"));
+app.use(helmet());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true,
+}));
+
+const port = process.env.PORT || 27001;
+var publicHtmlDir = __dirname + "/../client/";
+
+// Make the main app use our port and operate over HTTPS.
+https.createServer(credentials, app).listen(port);
+
+// Create a surrogate HTTP server to redirect all requests over HTTP.
+const redirectServer = express();
+
+redirectServer.get("*", function(req, res) {
+    res.redirect("https://" + req.headers.host + req.url);
+});
+
+redirectServer.listen(port - 1);
+
+// Create one more server for handling websockets. Wrapped in Express.
+const expressWsServer = http.createServer(express());
+const wss = new SocketServer({ expressWsServer, port: port + 1 });
+
+//////////////////////
+// WEBSOCKET SERVER //
+//////////////////////
 
 wss.on("connection", function connection(ws)
 {
@@ -121,33 +155,38 @@ function updateObjects(message)
     objects.Buildings = buildings;
     return JSON.stringify(objects);
 }
-/*
-function initiateGame(err, count)
-{
-var bodyParser = require("body-parser");
-var express = require("express");
-var app = express();
 
-var port = process.env.PORT || 3000;
-var publicHtmlDir = __dirname + "/../client/"
-
-app.use(express.static("public"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true,
-}));
-
-// Probably a bad idea... HTTPS.
-app.get("/", function(req, res) {
-    // Check for cookie, if no cookie respond with login.
-    console.log(req.headers, req.header);
-    res.sendFile(publicHtmlDir + "login.html");
-});
+/////////////////
+// HTTP SERVER //
+/////////////////
 
 app.post("/auth", function(req, res) {
-    console.log(req.body);
-    res.send("Received a POST request at /auth");
+    console.log("Received a POST request at /auth");
+    // Check for cookie, if no cookie respond with login.
+    if (req.body && req.body.username && req.body.password) {
+        if ((req.body.username === "root") && (req.body.password === "toor")) {
+            res.redirect("/game");
+        } else {
+            res.redirect("/?msg=Login+Failed&color=red");
+        }
+    } else {
+        res.redirect("/?msg=Login+Failed&color=red");
+    }
 });
 
-}
-*/
+app.post("/newaccount", function(req, res) {
+    console.log("Receive a POST request at /newaccount");
+    res.redirect("/?msg=Account+Created&color=green");
+});
+
+app.get("/game", function(req, res) {
+    res.sendFile(path.resolve(publicHtmlDir + "game.html"));
+});
+
+app.get("/register", function(req, res) {
+    res.sendFile(path.resolve(publicHtmlDir + "register.html"));
+});
+
+app.get("/", function(req, res) {
+    res.sendFile(path.resolve(publicHtmlDir + "login.html"));
+});

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Vector Power Defense | Register </title>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script>
+      // https://stackoverflow.com/a/901144/6759411
+      function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+      }
+
+      window.onload = function() {
+        var failed = getParameterByName("fail");
+
+        if (failed == "true") {
+          document.getElementById("failBanner").style.display = "inline";
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <form action="/newaccount" method="post">
+      <label>Email: </label>
+      <input type="email" name="email" />
+      <br />
+      <label>Username: </label>
+      <input type="text" name="username" />
+      <br />
+      <label>Password: </label>
+      <input type="password" name="password" />
+      <br />
+      <!--<div class="g-recaptcha" data-sitekey="6LcuYjsUAAAAABh-scJ8BfROE1jOvwZJ6zBdc3wI"></div>-->
+      <input type="submit" value="Register" />
+    </form>
+    <span id="failBanner" style="display: none;">
+      Login Failed
+    </span>
+  </body>
+</html>
