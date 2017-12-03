@@ -13,16 +13,16 @@ class OffenseTower extends Building
     Integer currentRoundDelay   :: Number of rounds since last spawn.
     Float averageSpawnDelay     :: Average time creep spawns after round begins.
     Float deviationSpawnDelay   :: Amount of possible deviation in spawn time.
-    Player player
+    CreepID idCounter
     */
 
-    constructor(xpos, ypos, type, cost, world, player)
+    constructor(xpos, ypos, type, cost, map, id)
     {
-        super(xpos, ypos, type, cost, world);
+        super(xpos, ypos, type, cost, map);
         this.isBoss = false;
         this.currentRoundDelay = 0;
         this.baseRoundDelay = 0;
-        this.player = player;
+        this.idCounter = id;
         switch (type)
         {
             // Always spawns at a set delay
@@ -58,17 +58,22 @@ class OffenseTower extends Building
         }
     }
 
+    get income()
+    {
+        return (this.totalValue * 0.1);
+    }
+
     // Spawns the creep associated with the tower type
     get spawn()
     {
         var spawnList = [];
         if (this.currentRoundDelay === 0)
         {
-            spawnList.push(new Creep(this.xpos, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.player.creepID));
+            spawnList.push(new Creep(this.xpos, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.idCounter.creepID));
             if (this.creepType === "Swarmie")
             {
-                spawnList.push(new Creep(this.xpos - 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.player.creepID));
-                spawnList.push(new Creep(this.xpos + 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.player.creepID));
+                spawnList.push(new Creep(this.xpos - 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.idCounter.creepID));
+                spawnList.push(new Creep(this.xpos + 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.idCounter.creepID));
             }
             this.currentRoundDelay = this.baseRoundDelay;
         }

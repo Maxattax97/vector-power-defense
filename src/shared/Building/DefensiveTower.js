@@ -18,9 +18,9 @@ class DefenseTower extends Building
     with base stats to calculate stats for higher levels
     */
 
-    constructor(xpos, ypos, type, cost, world)
+    constructor(xpos, ypos, type, cost, map)
     {
-        super(xpos, ypos, type, cost, world);
+        super(xpos, ypos, type, cost, map);
 
         this.baseDamage = 1;
         this.multDamage = 0.25;

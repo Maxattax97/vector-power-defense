@@ -3,11 +3,14 @@ const paper = require("paper");
 const Player = require("../../shared/Player");
 const World = require("../../shared/World");
 const WebSocket = require("ws");
+const Render = require("./gui/render");
 //const World = require("../../shared/World");
 
 var world;
 var player;
 var play = false;
+var lastTick = performance.now();
+var tickLength = 50;
 
 
 const WIDTH = 500;
@@ -44,7 +47,7 @@ ws.on("open", function() {
 });
 
 ws.on("message", function(message) {
-    var changes = message.data;
+    var changes = JSON.parse(message.data);
     if (changes.playerInfo === true)
     {
         world = new World(WIDTH, HEIGHT);
@@ -146,3 +149,53 @@ function upgradeListener(e)
         player.upgradeBuilding(e.currentTarget);
     }
 }
+
+(function () {
+    function main(tFrame) {
+    //start = window.requestAnimationFrame(main);
+        if (play === false)
+        {
+            return;
+        }
+        var nextTick = lastTick + tickLength;
+        var numTicks = 0;
+
+        //If tFrame < nextTick then 0 ticks need to be updated (0 is default for numTicks).
+        //If tFrame = nextTick then 1 tick needs to be updated (and so forth).
+        //Note: As we mention in summary, you should keep track of how large numTicks is.
+        //If it is large, then either your game was asleep, or the machine cannot keep up.
+        if (tFrame > nextTick) {
+            var timeSinceTick = tFrame - lastTick;
+            numTicks = Math.floor( timeSinceTick / tickLength );
+        }
+
+        queueUpdates(numTicks);
+        Render.render();
+    }
+
+    function queueUpdates(numTicks) {
+        for (var i=0; i < numTicks; i++) {
+            lastTick = lastTick + tickLength; //Now lastTick is this tick.
+            update(lastTick);
+        }
+    }
+
+    function setInitialState()
+    {
+        world.calculatePathing();
+    }
+
+    function update(tick)
+    {
+        if (tick === 0)
+        {
+            return;
+        }
+    }
+
+    lastTick = performance.now();
+    tickLength = 50; //This sets your simulation to run at 20Hz (50ms)
+
+    setInitialState();
+    main(performance.now()); // Start the cycle
+})();

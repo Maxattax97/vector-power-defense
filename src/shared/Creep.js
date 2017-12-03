@@ -19,18 +19,18 @@ class Creep
     Integer baseBounty
     Boolean isDead      :: Indicates if creep should be represented as dead for rendering.
     Integer speedTick   :: Timer for delay between tile movements.
-    World world         :: World instance containing the creep.
+    Tile[] map          :: Map instance containing the creep.
     Integer creepID     :: Used to tell creeps apart
     */
 
     // Build creep
-    constructor(xpos, ypos, type, level, world, isBoss, id)
+    constructor(xpos, ypos, type, level, map, isBoss, id)
     {
         this.xposition = xpos || 0;
         this.yposition = ypos || 0;
         this.creepType = type || "Creeper";
         this.creepLevel = level || 0;
-        this.world = world;
+        this.map = map;
         this.creepID = id;
 
         this.creepSize = 1;
@@ -113,8 +113,8 @@ class Creep
         while (this.speedTick >= MAXSPEED)
         {
             this.speedTick -= MAXSPEED;
-            this.xposition = this.world.map[this.xposition][this.yposition].nextTile.xposition;
-            this.yposition = this.world.map[this.xposition][this.yposition].nextTile.yposition;
+            this.xposition = this.map[this.xposition][this.yposition].nextTile.xposition;
+            this.yposition = this.map[this.xposition][this.yposition].nextTile.yposition;
         }
     }
 
