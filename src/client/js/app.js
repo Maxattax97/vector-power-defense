@@ -89,10 +89,13 @@ window.addEventLister("keypress", function(e){
         case 53:
             buildType = 5;
             break;
-        case 83:
+        case 80:    // P key
+            buildType = "Promote";
+            break;
+        case 83:    // S key
             buildType = "Sell";
             break;
-        case 85:
+        case 85:    // U key
             buildType = "Upgrade";
             break;
     }
@@ -103,7 +106,7 @@ window.addEventLister("keyup", function(){
 });
 
 window.addEventLister("click", function(e){
-    if (play === false || buildType === "Neutral" || buildType === "Sell" || buildType === "Upgrade")
+    if (play === false || !(1 <= buildType && buildType <= 5))
     {
         return;
     }
@@ -127,6 +130,10 @@ window.addEventLister("click", function(e){
             {
                 building.addEventListener("click", sellListener(e));
                 building.addEventListener("click", upgradeListener(e));
+                if(!player.isDefense)
+                {
+                    building.addEventListener("click", promoteListener(e));
+                }
             }
         }
     }
@@ -150,6 +157,14 @@ function upgradeListener(e)
     }
 }
 
+function promoteListener(e)
+{
+    if (buildType === "Promote")
+    {
+        player.promoteSpawner(e.currentTarget);
+    }
+}
+
 (function () {
     function main(tFrame) {
     //start = window.requestAnimationFrame(main);
@@ -170,7 +185,7 @@ function upgradeListener(e)
         }
 
         queueUpdates(numTicks);
-        Render.render();
+        Render.render(world);
     }
 
     function queueUpdates(numTicks) {

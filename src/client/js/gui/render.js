@@ -87,7 +87,7 @@ function shootSplash(a, b, items, splashRange) {
     }
 }
 
-function render() {
+function render(world) {
     var rect = new Path.Rectangle({
         point: [0, 0],
         size: [paper.view.size.width, paper.view.size.height],
@@ -119,6 +119,31 @@ function render() {
         "#dd0048",
     ];
 
+    for(var building in world.buildings)
+    {
+        var color;
+        switch(world.buildings.buildingType)
+        {
+            case "BasicTower":
+                color = colors[0];
+                break;
+            case "AirTower":
+                color = colors[1];
+                break;
+            case "WaterTower":
+                color = colors[2];
+                break;
+            case "EarthTower":
+                color = colors[3];
+                break;
+            case "FireTower":
+                color = colors[4];
+                break;
+        }
+        const tower = createTower(building.buildingLevel, color);
+        positionTower(tower, building.xposition, building.yposition);
+    }
+    /*
     for (let type = 0; type < colors.length; type++) {
         const moreTowers = towers[type];
         const color = colors[type];
@@ -128,6 +153,7 @@ function render() {
             moreTowers.push(tower);
         }
     }
+    */
 
     const items = [].concat.apply([], towers);
     shootBetween(basicTowers[0], basicTowers[1]);
