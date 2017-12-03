@@ -91,8 +91,8 @@ function render() {
     var rect = new Path.Rectangle({
         point: [0, 0],
         size: [paper.view.size.width, paper.view.size.height],
-        strokeColor: 'black',
-        fillColor: '#000000',
+        strokeColor: "black",
+        fillColor: "#000000",
         selected: true,
     });
     rect.sendToBack();

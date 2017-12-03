@@ -39,6 +39,7 @@ class Player
     purchaseBuilding(xpos, ypos, type)
     {
         var cost = 0;
+        var newBuild;
         if (type.indexOf("Tower") !== -1)
         {
             switch (type)
@@ -62,7 +63,9 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                this.buildings.push(new DefenseTower(xpos, ypos, type, cost, this.world));
+                newBuild = new DefenseTower(xpos, ypos, type, cost, this.world);
+                this.buildings.push(newBuild);
+                return newBuild;
             }
         }
         else if (type.indexOf("Spawn") !== -1)
@@ -88,13 +91,12 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                this.buildings.push(new OffenseTower(xpos, ypos, type, cost, this.world));
+                newBuild = new OffenseTower(xpos, ypos, type, cost, this.world);
+                this.buildings.push(newBuild);
+                return newBuild;
             }
         }
-        if (cost === 0)
-        {
-            console.log("Invalid building type");
-        }
+        return null;
     }
 
     sellBuilding(building)

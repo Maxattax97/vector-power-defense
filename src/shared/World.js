@@ -57,6 +57,11 @@ class World
 
     }
 
+    isValidSpot(xpos, ypos)
+    {
+        return this.map[xpos][ypos].isBuildable;
+    }
+
     // Called by client side to update the objects in the world for rendering
     update(buildingsNew, creepsNew, buildingsLost, creepsLost)
     {
