@@ -1,6 +1,8 @@
 
 const Building = require("../Building");
 
+const FIRE = 10;
+
 class DefenseTower extends Building
 {
     /*
@@ -13,6 +15,7 @@ class DefenseTower extends Building
     Integer baseSplash
     Float multSplash
     String priority
+    Integer cooldown
 
     NOTE: Base stats are the stats for a level 0 building, multipliers are used
     with base stats to calculate stats for higher levels
@@ -29,6 +32,7 @@ class DefenseTower extends Building
         this.baseRange = 3.5;
         this.multRange = 0.25;
         this.baseSplash = 0;
+        this.cooldown = 0;
 
         switch (type)
         {
@@ -94,6 +98,16 @@ class DefenseTower extends Building
     // Deals damage to one creep based on the tower's stats
     attack(creepList)
     {
+        this.cooldown += this.rate;
+        if (this.cooldown < FIRE)
+        {
+            return null;
+        }
+        else
+        {
+            this.cooldown -= FIRE;
+        }
+
         var minDistance = -1;
         var minCreep = null;
         for (var creep in creepList) {
@@ -102,12 +116,20 @@ class DefenseTower extends Building
                 minCreep = creep;
             }
         }
-
-        if ((minCreep) && (minDistance <= this.range)) {
+        if (minCreep === null)
+        {
+            this.cooldown = FIRE - this.rate;
+            return null;
+        }
+        if (minDistance <= this.range) {
             minCreep.currHealth -= this.damage;
 
             if (minCreep.currHealth <= 0) {
                 minCreep.perish();
+                return minCreep;
+            }
+            else {
+                return null;
             }
         }
     }

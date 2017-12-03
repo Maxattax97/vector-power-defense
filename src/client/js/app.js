@@ -19,8 +19,8 @@ const HEIGHT = 300;
 var buildType = "Neutral";
 var newBuildings = [];
 var removedBuildings = [];
-//var newCreeps = [];
-//var removedCreeps = [];
+var newCreeps = [];
+var removedCreeps = [];
 
 const defenseTypes = [
     "BasicTower",
@@ -191,6 +191,48 @@ function upgradeListener(e)
         {
             return;
         }
+        while (tick > 0)
+        {
+            if (player.isDefense)
+            {
+                var tower;
+                var target;
+                for (tower in player.buildings)
+                {
+                    target = tower.attack(world.creeps);
+                    if (target !== null)
+                    {
+                        removedCreeps.push(target);
+                        world.removeCreep(target);
+                    }
+                }
+            }
+            else
+            {
+                var spawner;
+                for (spawner in player.buildings)
+                {
+                    var creep;
+                    for (creep in spawner.spawn)
+                    {
+                        newCreeps.push(creep);
+                        world.addCreep(creep);
+                    }
+                }
+            }
+            tick--;
+        }
+        var objects;
+        objects.newBuildings = newBuildings;
+        objects.removedBuildings = removedBuildings;
+        objects.newCreeps = newCreeps;
+        objects.removedCreeps = removedCreeps;
+        newBuildings = [];
+        removedBuildings = [];
+        newCreeps = [];
+        removedCreeps = [];
+        ws.send(JSON.stringify(objects));
+
     }
 
     lastTick = performance.now();
