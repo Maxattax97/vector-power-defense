@@ -22,6 +22,7 @@ class Player
     PowerNode powerNode     :: Power node owned by the player.
     Boolean isDefense       :: Whether the player is a defender or not.
     World world             :: World instance that player is playing with.
+    Integer idCounter       :: Counter for assigning ids for offensive player's creeps
     */
 
     constructor(xpos, ypos, world, isDefense, numDefenders)
@@ -33,7 +34,24 @@ class Player
         {
             this.powerNode = new PowerNode(xpos, ypos, this.world, numDefenders);
         }
+        else
+        {
+            this.idCounter = 0;
+        }
         this.isDefense = isDefense;
+    }
+
+    get creepID()
+    {
+        if (this.idCounter === Number.MAX_SAFE_INTEGER)
+        {
+            this.idCounter = 0;
+        }
+        else
+        {
+            this.idCounter++;
+        }
+        return this.idCounter;
     }
 
     purchaseBuilding(xpos, ypos, type)
@@ -91,7 +109,7 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                newBuild = new OffenseTower(xpos, ypos, type, cost, this.world);
+                newBuild = new OffenseTower(xpos, ypos, type, cost, this.world, this);
                 this.buildings.push(newBuild);
                 return newBuild;
             }

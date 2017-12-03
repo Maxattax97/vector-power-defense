@@ -59,7 +59,7 @@ function updateObjects(message)
     {
         for (i = 0; i < creeps.length; i++)
         {
-            if (creeps[i].xposition === creep.xposition && creeps[i].yposition === creep.yposition)
+            if (creeps[i].creepID === creep.creepID)
             {
                 creeps.splice(i, i+1);
                 break;

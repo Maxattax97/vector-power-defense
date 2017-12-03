@@ -1,13 +1,14 @@
 
 const paper = require("paper");
-const World = require("../../shared/World");
+const WebSocket = require("ws");
+//const World = require("../../shared/World");
 
 var world;
 var player;
 
+/*
 const WIDTH = 500;
 const HEIGHT = 300;
-/*
 const SIZE = 20;
 
 const BASECOLOR = "#85929e";    // Gray
@@ -28,6 +29,10 @@ const NODECOLOR = "#f7dc6f";    // Light Yellow
 // Might be needed to clear canvas at each frame
 //var renderList = [];
 var buildType = "Neutral";
+var newBuildings = [];
+var removedBuildings = [];
+//var newCreeps = [];
+//var removedCreeps = [];
 
 const defenseTypes = [
     "BasicTower",
@@ -45,10 +50,31 @@ const offenseTypes = [
     "MassimoSpawn",
 ];
 
+const ws = new WebSocket("ws://www.maxocull.com/vpd", {
+    perMessageDeflate: false,
+});
+
+ws.on("open", function() {
+    ws.send("Assign Player");
+});
+
+ws.on("message", function(message) {
+    var changes = message.data;
+    if (changes.playerInfo === true)
+    {
+        player = changes.player;
+        world = changes.world;
+    }
+    else
+    {
+        world.creeps = changes.Creeps;
+        world.buildings = changes.Buildings;
+    }
+});
+
 window.onload = function() {
     const canvas = document.getElementById("canvas");
     paper.setup(canvas);
-    world = new World(WIDTH, HEIGHT, 4);
 };
 
 window.addEventLister("keypress", function(e){
@@ -101,10 +127,12 @@ window.addEventLister("click", function(e){
                 type = offenseTypes[buildType - 1];
             }
             var building = player.purchaseBuilding(e.clientX, e.clientY, type);
+            world.addBuilding(building);
+            newBuildings.push(building);
             if (building !== null)
             {
-                building.addEventListener("click", upgradeListener(e));
                 building.addEventListener("click", sellListener(e));
+                building.addEventListener("click", upgradeListener(e));
             }
         }
     }
@@ -115,7 +143,8 @@ function sellListener(e)
     if (buildType === "Sell")
     {
         player.sellBuilding(e.currentTarget);
-        delete e.currentTarget;
+        world.removeBuilding(e.currentTarget);
+        removedBuildings.push(e.currentTarget);
     }
 }
 
