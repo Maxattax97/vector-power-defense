@@ -1,5 +1,11 @@
 public
 
+# Tern files
+*.tern*
+
+# Keys and certificates
+*.pem
+
 *.swp
 *.swo
 
