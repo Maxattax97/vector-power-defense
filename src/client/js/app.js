@@ -109,7 +109,7 @@ window.addEventLister("click", function(e){
     }
     else
     {
-        if (world.isValidSpot(e.clientX, e.clientY))
+        if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
         {
             var type;
             if (player.isDefense)
