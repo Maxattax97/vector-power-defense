@@ -51,7 +51,7 @@ const redirectServer = redirectApp.listen(port - 1);
 
 // Create one more server for handling websockets. Wrapped in Express.
 const expressWsServer = http.createServer(express());
-const wss = new SocketServer({ expressWsServer, port: port + 1 });
+const wss = new SocketServer({ server: expressWsServer, port: port + 1 });
 
 //////////////////////
 // WEBSOCKET SERVER //
