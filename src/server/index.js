@@ -66,6 +66,11 @@ const wss = new SocketServer({ expressWsServer, port: port + 1 });
 // WEBSOCKET SERVER //
 //////////////////////
 
+// Lists of all game objects
+var creeps = [];
+var buildings = [];
+var numConnections = 0;
+
 wss.on("connection", function connection(ws)
 {
     console.log("connection ...");
