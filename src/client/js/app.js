@@ -18,8 +18,10 @@ const HEIGHT = 300;
 
 var buildType = "Neutral";
 var newBuildings = [];
+var changedBuildings = [];
 var removedBuildings = [];
 var newCreeps = [];
+var changedCreeps = [];
 var removedCreeps = [];
 
 const defenseTypes = [
@@ -60,8 +62,8 @@ ws.on("message", function(message) {
     }
     else
     {
-        world.creeps = changes.Creeps;
-        world.buildings = changes.Buildings;
+        world.creeps = changes.creeps;
+        world.buildings = changes.buildings;
     }
     play = changes.play;
 });
@@ -154,6 +156,7 @@ function upgradeListener(e)
     if (buildType === "Upgrade")
     {
         player.upgradeBuilding(e.currentTarget);
+        changedBuildings.push(e.currentTarget);
     }
 }
 
@@ -162,6 +165,7 @@ function promoteListener(e)
     if (buildType === "Promote")
     {
         player.promoteSpawner(e.currentTarget);
+        changedBuildings.push(e.currentTarget);
     }
 }
 
@@ -219,13 +223,25 @@ function promoteListener(e)
                     target = tower.attack(world.creeps);
                     if (target !== null)
                     {
-                        removedCreeps.push(target);
-                        world.removeCreep(target);
+                        if (target.currHealth <= 0)
+                        {
+                            removedCreeps.push(target);
+                            world.removeCreep(target);
+                        }
+                        else
+                        {
+                            changedCreeps.push(target);
+                        }
                     }
                 }
             }
             else
             {
+                for (creep in world.creeps)
+                {
+                    creep.move();
+                    changedCreeps.push(creep);
+                }
                 for (spawner in player.buildings)
                 {
                     for (creep in spawner.spawn)
@@ -235,20 +251,20 @@ function promoteListener(e)
                     }
                 }
             }
-            for (creep in world.creeps)
-            {
-                creep.move();
-            }
             tick--;
         }
         var objects;
         objects.newBuildings = newBuildings;
+        objects.changedBuildings = changedBuildings;
         objects.removedBuildings = removedBuildings;
         objects.newCreeps = newCreeps;
+        objects.changedCreeps = changedCreeps;
         objects.removedCreeps = removedCreeps;
         newBuildings = [];
+        changedBuildings = [];
         removedBuildings = [];
         newCreeps = [];
+        changedCreeps = [];
         removedCreeps = [];
         ws.send(JSON.stringify(objects));
 
