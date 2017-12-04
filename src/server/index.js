@@ -11,11 +11,6 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 
-// Lists of all game objects
-var creeps = [];
-var buildings = [];
-var numConnections = 0;
-
 //init Express Router
 //var router = express.Router();
 
@@ -93,7 +88,6 @@ wss.on("connection", function connection(ws)
         }
         ws.send(response);
     });
-
     //ws.send("message from server at: " + new Date());
 });
 
