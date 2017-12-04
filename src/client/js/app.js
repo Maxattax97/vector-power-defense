@@ -252,6 +252,7 @@ function promoteListener(e)
                     }
                 }
             }
+            player.receiveIncome();
             tick--;
         }
         var objects;
