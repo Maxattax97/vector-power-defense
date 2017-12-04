@@ -35,7 +35,17 @@ const offenseTypes = [
     "MassimoSpawn",
 ];
 
-const ws = new WebSocket("ws://www.maxocull.com/vpd", {
+const loc = window.location;
+let wsUri;
+if (loc.protocol === "https:") {
+    wsUri = "wss:";
+} else {
+    wsUri = "ws:";
+}
+wsUri += "//" + loc.host;
+console.log(wsUri);
+
+const ws = new WebSocket(wsUri, {
     perMessageDeflate: false,
 });
 
