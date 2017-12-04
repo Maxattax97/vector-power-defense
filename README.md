@@ -8,10 +8,13 @@ Server and client code for the epic CS 252 tower defense project.
 
 * npm 5.5.1+
 * node 8.6.0+
+* mongodb 3.4.10+
 
 ```
 npm install
 ```
+
+install mongodb
 
 ## Options
 
