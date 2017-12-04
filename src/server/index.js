@@ -17,14 +17,6 @@ const credentials = {
     cert: fs.readFileSync(__dirname + "/security/certificate.pem").toString(),
 };
 
-/* Lists of all game objects
-var creeps = [];
-var defenseTowers = [];
-var offenseTowers = [];
-var powerNodes = [];
-var playerList = [];
-*/
-
 app.use(express.static("public"));
 app.use(helmet()); // Security enhancements.
 app.use(bodyParser.json());
@@ -65,17 +57,115 @@ const wss = new SocketServer({ expressWsServer, port: port + 1 });
 // WEBSOCKET SERVER //
 //////////////////////
 
+// Lists of all game objects
+var creeps = [];
+var buildings = [];
+var numConnections = 0;
+
 wss.on("connection", function connection(ws)
 {
     console.log("connection ...");
+    var currConnections = ++numConnections;
+    if (numConnections > 5)
+    {
+        ws.deny = true;
+    }
 
     ws.on("message", function incoming(message)
     {
-        console.log("received: %s", message);
+        var response;
+        if (message === "Assign Player")
+        {
+            response = initializePlayer(currConnections);
+        }
+        else
+        {
+            response = updateObjects(message);
+        }
+        ws.send(response);
     });
 
-    ws.send("message from server at: " + new Date());
+    //ws.send("message from server at: " + new Date());
 });
+
+function initializePlayer(currConnections)
+{
+    var playerInfo;
+    playerInfo.isDefense = true;
+    playerInfo.playerInfo = true;
+    playerInfo.play = false;
+    switch (currConnections)
+    {
+        case 1:
+            playerInfo.isDefense = false;
+            playerInfo.xpos = 1/2;
+            playerInfo.ypos = 1/2;
+            break;
+        case 2:
+            playerInfo.xpos = 1/16;
+            playerInfo.ypos = 1/16;
+            break;
+        case 3:
+            playerInfo.xpos = 15/16;
+            playerInfo.ypos = 1/16;
+            break;
+        case 4:
+            playerInfo.xpos = 1/16;
+            playerInfo.ypos = 15/16;
+            break;
+        case 5:
+            playerInfo.xpos = 15/16;
+            playerInfo.ypos = 15/16;
+            playerInfo.play = true;
+            break;
+    }
+    return JSON.stringify(playerInfo);
+}
+
+// Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
+function updateObjects(message)
+{
+    var changes = JSON.parse(message.data);
+    var i;
+    var creep;
+    var building;
+    for (building in changes.newBuildings)
+    {
+        buildings.push(building);
+    }
+    for (building in changes.removedBuilding)
+    {
+        for (i = 0; i < buildings.length; i++)
+        {
+            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+            {
+                buildings.splice(i, i+1);
+                break;
+            }
+        }
+    }
+    for (creep in changes.newCreeps)
+    {
+        creeps.push(creep);
+    }
+    for (creep in changes.removedCreeps)
+    {
+        for (i = 0; i < creeps.length; i++)
+        {
+            if (creeps[i].creepID === creep.creepID)
+            {
+                creeps.splice(i, i+1);
+                break;
+            }
+        }
+    }
+    var objects;
+    objects.playerInfo = false;
+    objects.play = true;
+    objects.Creeps = creeps;
+    objects.Buildings = buildings;
+    return JSON.stringify(objects);
+}
 
 /////////////////
 // HTTP SERVER //

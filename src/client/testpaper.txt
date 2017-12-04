@@ -1,0 +1,40 @@
+Test file for colors and sizes. Copy and paste into http://sketch.paperjs.org to test
+// Towers
+var rectangle = new Path.Rectangle(new Point(10, 0), new Size(20, 20));
+rectangle.fillColor = "#85929e";
+var rectangle = new Path.Rectangle(new Point(40, 0), new Size(20, 20));
+rectangle.fillColor = "#d0d3d4";
+var rectangle = new Path.Rectangle(new Point(70, 0), new Size(20, 20));
+rectangle.fillColor = "#196f3d";
+var rectangle = new Path.Rectangle(new Point(100, 0), new Size(20, 20));
+rectangle.fillColor = "#3498db";
+var rectangle = new Path.Rectangle(new Point(130, 0), new Size(20, 20));
+rectangle.fillColor = "#c0392b";
+
+// Spawners
+var rectangle = new Path.Rectangle(new Point(10, 40), new Size(20, 20));
+rectangle.fillColor = "#6c3483";
+var rectangle = new Path.Rectangle(new Point(40, 40), new Size(20, 20));
+rectangle.fillColor = "#d834db";
+var rectangle = new Path.Rectangle(new Point(70, 40), new Size(20, 20));
+rectangle.fillColor = "#73c6b6";
+var rectangle = new Path.Rectangle(new Point(100, 40), new Size(20, 20));
+rectangle.fillColor = "#d4aC0d";
+var rectangle = new Path.Rectangle(new Point(130, 40), new Size(20, 20));
+rectangle.fillColor = "#d35400";
+
+// Power Node
+var rectangle = new Path.Rectangle(new Point(70, 100), new Size(40, 40));
+rectangle.fillColor = "#f7dc6f";
+
+// Creeps
+var circle = new Path.Circle(new Point(10, 160), 5);
+circle.fillColor = "#6c3483";
+var circle = new Path.Circle(new Point(40, 160), 5);
+circle.fillColor = "#d834db";
+var circle = new Path.Circle(new Point(70, 160), 3);
+circle.fillColor = "#73c6b6";
+var circle = new Path.Circle(new Point(100, 160), 7);
+circle.fillColor = "#d4aC0d";
+var circle = new Path.Circle(new Point(130, 160), 9);
+circle.fillColor = "#d35400";

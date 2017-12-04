@@ -1,6 +1,6 @@
 
 const Tile = require("./Tile");
-const Player = require("./Player");
+//const Player = require("./Player");
 
 class World
 {
@@ -8,16 +8,13 @@ class World
     Integer xsize
     Integer ysize
     Tiles[][] map
-    Player offensePlayer
-    Player[] defensePlayers
     Building[] buildings
     PowerNode[] nodes
     Creep[] creeps
     */
-    constructor(xsize, ysize, numDefenders)
+    constructor(xsize, ysize)
     {
         this.map = [];
-        this.defensePlayers = [];
         this.buildings = [];
         this.creeps = [];
         this.xsize = xsize;
@@ -27,70 +24,45 @@ class World
                 this.map[x][y] = new Tile(x, y, "#444444", true, true);
             }
         }
-        this.offensePlayer = new Player(xsize/2, ysize/2, this, false, 0);
-        if (numDefenders >= 1)
-        {
-            this.defensePlayers.push(new Player(xsize/16, ysize/16, this, true, numDefenders));
-            this.buildings.push(this.defensePlayers[0].powerNode);
-            this.nodes.push(this.defensePlayers[0].powerNode);
-        }
-        if (numDefenders >= 2)
-        {
-            this.defensePlayers.push(new Player(xsize/16, ysize*15/16, this, true, numDefenders));
-            this.buildings.push(this.defensePlayers[1].powerNode);
-            this.nodes.push(this.defensePlayers[1].powerNode);
-        }
-        if (numDefenders >= 3)
-        {
-            this.defensePlayers.push(new Player(xsize*15/16, ysize/16, this, true, numDefenders));
-            this.buildings.push(this.defensePlayers[2].powerNode);
-            this.nodes.push(this.defensePlayers[2].powerNode);
-        }
-        if (numDefenders === 4)
-        {
-            this.defensePlayers.push(new Player(xsize*15/16, ysize*15/16, this, true, numDefenders));
-            this.buildings.push(this.defensePlayers[3].powerNode);
-            this.nodes.push(this.defensePlayers[3].powerNode);
-        }
-
-
-
     }
 
-    // Called by client side to update the objects in the world for rendering
-    update(buildingsNew, creepsNew, buildingsLost, creepsLost)
+    isValidSpot(xpos, ypos)
+    {
+        return this.map[xpos][ypos].isBuildable;
+    }
+
+    addBuilding(building)
+    {
+        this.buildings.push(building);
+    }
+
+    removeBuilding(building)
     {
         var i;
-        var building;
-        for (building in buildingsNew)
+        for (i = 0; i < this.buildings.length; i++)
         {
-            this.buildings.push(building);
-        }
-        for (building in buildingsLost)
-        {
-            for (i = 0; i < this.buildings.length; i++)
+            if (this.buildings[i].xposition === building.xposition && this.buildings[i].yposition === building.yposition)
             {
-                if (this.buildings[i].xposition === building.xposition && this.buildings[i].yposition === building.yposition)
-                {
-                    this.buildings.splice(i, i+1);
-                    break;
-                }
+                this.buildings.splice(i, i+1);
+                return;
             }
         }
-        var creep;
-        for (creep in creepsNew)
+    }
+
+    addCreep(creep)
+    {
+        this.creeps.push(creep);
+    }
+
+    removeCreep(creep)
+    {
+        var i;
+        for (i = 0; i < this.creeps.length; i++)
         {
-            this.creeps.push(creep);
-        }
-        for (creep in creepsLost)
-        {
-            for (i = 0; i < this.creeps.length; i++)
+            if (this.creeps[i].creepID === creep.creepID)
             {
-                if (this.creeps[i].xposition === creep.xposition && this.creeps[i].yposition === creep.yposition)
-                {
-                    this.creeps.splice(i, i+1);
-                    break;
-                }
+                this.creeps.splice(i, i+1);
+                return;
             }
         }
     }

@@ -13,14 +13,16 @@ class OffenseTower extends Building
     Integer currentRoundDelay   :: Number of rounds since last spawn.
     Float averageSpawnDelay     :: Average time creep spawns after round begins.
     Float deviationSpawnDelay   :: Amount of possible deviation in spawn time.
+    Player player
     */
 
-    constructor(xpos, ypos, type, cost, world)
+    constructor(xpos, ypos, type, cost, world, player)
     {
         super(xpos, ypos, type, cost, world);
         this.isBoss = false;
         this.currentRoundDelay = 0;
         this.baseRoundDelay = 0;
+        this.player = player;
         switch (type)
         {
             // Always spawns at a set delay
@@ -62,11 +64,11 @@ class OffenseTower extends Building
         var spawnList = [];
         if (this.currentRoundDelay === 0)
         {
-            spawnList.push(new Creep(this.xpos, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss));
+            spawnList.push(new Creep(this.xpos, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.player.creepID));
             if (this.creepType === "Swarmie")
             {
-                spawnList.push(new Creep(this.xpos - 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss));
-                spawnList.push(new Creep(this.xpos + 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss));
+                spawnList.push(new Creep(this.xpos - 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.player.creepID));
+                spawnList.push(new Creep(this.xpos + 5, this.ypos - 5, this.creepType, this.buildingLevel, this.isBoss, this.player.creepID));
             }
             this.currentRoundDelay = this.baseRoundDelay;
         }
