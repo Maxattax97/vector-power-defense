@@ -44,3 +44,20 @@ Error: Gulp crashes with an `ENOSPC` error.
 
 Solution: [Increase OS's maximum file watchers](https://stackoverflow.com/questions/16748737/grunt-watch-error-waiting-fatal-error-watch-enospc)
 
+## Database
+
+### Start
+
+```
+$ sudo systemctl start mongod
+$ sudo systemctl status mongod
+```
+
+### Check accounts
+
+```
+$ mongo
+> use vpd
+> db.accounts.find().pretty()
+```
+
