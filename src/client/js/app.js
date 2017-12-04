@@ -6,8 +6,8 @@ const WebSocket = require("ws");
 const Render = require("./gui/render");
 //const World = require("../../shared/World");
 
-var world;
-var player;
+var world = new World(0,0);
+var player = new Player(0,0, null, false, 0);
 var play = false;
 var lastTick = performance.now();
 var tickLength = 50;
@@ -71,7 +71,7 @@ window.onload = function() {
     paper.setup(canvas);
 };
 
-window.addEventLister("keypress", function(e){
+window.addEventListener("keypress", function(e){
     switch (e.keyCode)
     {
         case 49:
@@ -101,11 +101,11 @@ window.addEventLister("keypress", function(e){
     }
 });
 
-window.addEventLister("keyup", function(){
+window.addEventListener("keyup", function(){
     buildType = "Neutral";
 });
 
-window.addEventLister("click", function(e){
+window.addEventListener("click", function(e){
     if (play === false || !(1 <= buildType && buildType <= 5))
     {
         return;
