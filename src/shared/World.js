@@ -29,6 +29,21 @@ class World
         }
     }
 
+    get string()
+    {
+        var result = "Buildings: ";
+        for (var building in this.buildings)
+        {
+            result = result + "(" + building.string + ") ";
+        }
+        result = result + "\r\nCreeps: ";
+        for (var creep in this.creeps)
+        {
+            result = result + "(" + creep.string + ") ";
+        }
+        result = result + "\r\n";
+    }
+
     isValidSpot(buildx, buildy, playerx, playery)
     {
         if (playerx === this.xsize/16)

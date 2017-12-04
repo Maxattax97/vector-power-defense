@@ -64,6 +64,7 @@ ws.on("message", function(message) {
     {
         world.creeps = changes.creeps;
         world.buildings = changes.buildings;
+        console.log(world.string);
     }
     play = changes.play;
 });
