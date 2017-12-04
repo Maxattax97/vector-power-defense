@@ -8,10 +8,13 @@ Server and client code for the epic CS 252 tower defense project.
 
 * npm 5.5.1+
 * node 8.6.0+
+* mongodb 3.4.10+
 
 ```
 npm install
 ```
+
+install mongodb
 
 ## Options
 
@@ -40,4 +43,21 @@ oneline: `kill $(lsof -i | grep 3000 | awk '{print $2}')`
 Error: Gulp crashes with an `ENOSPC` error.
 
 Solution: [Increase OS's maximum file watchers](https://stackoverflow.com/questions/16748737/grunt-watch-error-waiting-fatal-error-watch-enospc)
+
+## Database
+
+### Start
+
+```
+$ sudo systemctl start mongod
+$ sudo systemctl status mongod
+```
+
+### Check accounts
+
+```
+$ mongo
+> use vpd
+> db.accounts.find().pretty()
+```
 

@@ -15,7 +15,9 @@ module.exports = function() {
         const start = process.hrtime();
         return bundler
             .bundle()
-            .on("error", function() {})
+            .on("error", function() {
+                console.log("[        ] \x1b[31mBuildError\x1b[0m in '\x1b[36mbuild-js\x1b[0m'");
+            })
             .pipe(source("bundle.js"))
             .pipe(gulp.dest("./public/"))
             .on("end", function() {
