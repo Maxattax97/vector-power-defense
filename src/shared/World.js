@@ -14,15 +14,18 @@ class World
     Building[] buildings
     PowerNode[] nodes
     Creep[] creeps
+    String[] usernames
     */
     constructor(xsize, ysize)
     {
         this.map = [];
         this.buildings = [];
         this.creeps = [];
+        this.usernames = [];
         this.xsize = xsize;
         this.ysize = ysize;
         for (var x = 0; x < xsize; x++) {
+            this.map[x] = [];
             for (var y = 0; y < ysize; y++) {
                 this.map[x][y] = new Tile(x, y, "#444444", true, true);
             }

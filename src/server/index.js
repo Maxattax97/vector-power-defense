@@ -1,8 +1,10 @@
+// NodeJS Modules //
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
+// External Modules //
 const SocketServer = require("ws").Server;
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
@@ -12,8 +14,8 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 
-//init Express Router
-//var router = express.Router();
+// Game Modules //
+const World = require("../shared/World.js");
 
 const app = express();
 const cookieSecret = require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret;
@@ -76,41 +78,70 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     //////////////////////
 
     // Lists of all game objects
-    var creeps = [];
-    var buildings = [];
-    var numConnections = 0;
+    var worlds = [];
+    var lobbyists = [];
+    var positionsFilled = 0;
+    var fillingWorld = null;
 
     wss.on("connection", function connection(ws, req)
     {
-        console.log(`connection from user ${req.session.userId}`);
-
         db.collection("accounts", {}, function(err, col) {
             col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
-                console.log(account);
-
-                var currConnections = ++numConnections;
-                if (numConnections > 5)
-                {
-                    ws.deny = true;
+                if (! account) {
+                    console.error("Invalid account");
+                    return;
                 }
+                var residentWorld = null;
+
+                lobbyists.push({
+                    account: account,
+                    socket: ws,
+                });
+
+                console.log(lobbyists.length + " players are waiting in lobby ...");
 
                 ws.on("message", function incoming(message)
                 {
                     var response;
                     if (message === "Assign Player")
                     {
-                        response = initializePlayer(currConnections);
+                        response = initializePlayer(positionsFilled);
+                        positionsFilled++;
+
+                        if (! fillingWorld)
+                        {
+                            initializeGame();
+                        }
+
+                        if ((! residentWorld) && (fillingWorld)) {
+                            residentWorld = fillingWorld;
+                            residentWorld.usernames.push(account.username);
+                        }
+
+                        if ((residentWorld) && (residentWorld.usernames.length >= 5)) {
+                            fillingWorld = null;
+                            lobbyists = [];
+                            positionsFilled = 0;
+                            console.log("Game world created, populated, and started");
+                        }
                     }
                     else
                     {
-                        response = updateObjects(message);
+                        response = updateObjects(message, account, residentWorld);
                     }
                     ws.send(response);
                 });
-                //ws.send("message from server at: " + new Date());
+            }).catch(function(err) {
+                console.error(err);
             });
         });
     });
+
+    function initializeGame() {
+        var world = new World(50, 50);
+        worlds.push(world);
+        fillingWorld = world;
+    }
 
     function initializePlayer(currConnections)
     {
@@ -120,24 +151,24 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         playerInfo.play = false;
         switch (currConnections)
         {
-            case 1:
+            case 0:
                 playerInfo.isDefense = false;
                 playerInfo.xpos = 1/2;
                 playerInfo.ypos = 1/2;
                 break;
-            case 2:
+            case 1:
                 playerInfo.xpos = 1/16;
                 playerInfo.ypos = 1/16;
                 break;
-            case 3:
+            case 2:
                 playerInfo.xpos = 15/16;
                 playerInfo.ypos = 1/16;
                 break;
-            case 4:
+            case 3:
                 playerInfo.xpos = 1/16;
                 playerInfo.ypos = 15/16;
                 break;
-            case 5:
+            case 4:
                 playerInfo.xpos = 15/16;
                 playerInfo.ypos = 15/16;
                 playerInfo.play = true;
@@ -147,9 +178,17 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     }
 
     // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
-    function updateObjects(message)
+    function updateObjects(message, account, world)
     {
         var changes = JSON.parse(message.data);
+
+        if (!world) {
+            throw new Error("User has no resident world");
+        }
+
+        var buildings = world.buildings;
+        var creeps = world.creeps;
+
         var i;
         var creep;
         var building;
