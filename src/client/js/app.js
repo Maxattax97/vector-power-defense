@@ -63,7 +63,7 @@ ws.onmessage = function(message) {
         {
             buildMap[x] = [];
         }
-        player = new Player(changes.xpos * WIDTH, changes.ypos * HEIGHT, world, changes.isDefense, 4);
+        player = new Player(Math.round(changes.xpos * WIDTH), Math.round(changes.ypos * HEIGHT), world, changes.isDefense, 4);
         if (changes.isDefense)
         {
             newBuildings.push(player.powerNode);
@@ -74,7 +74,6 @@ ws.onmessage = function(message) {
     {
         world.creeps = changes.creeps;
         world.buildings = changes.buildings;
-        console.log(world.string);
     }
     play = true;
 };
@@ -157,6 +156,7 @@ window.addEventListener("click", function(e){
             if ((building))
             {
                 world.addBuilding(building);
+                console.log(building.string);
                 newBuildings.push(building);
                 for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
                 {
@@ -257,6 +257,7 @@ function promote(e)
         {
             for (tower in player.buildings)
             {
+                console.log(tower.buildingType);
                 target = tower.attack(world.creeps);
                 if (target !== null)
                 {

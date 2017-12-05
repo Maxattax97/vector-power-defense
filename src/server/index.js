@@ -142,7 +142,7 @@ function updateObjects(message)
     var building;
     for (building in changes.newBuildings)
     {
-        console.log(building.string);
+        console.log("building.string");
         buildings.push(building);
     }
     for (building in changes.changedBuilding)
@@ -202,7 +202,7 @@ function updateObjects(message)
     };
     if (buildings.length !== 0)
     {
-        console.log(buildings[0].xposition);
+        console.log("buildings[0].xposition");
     }
     return JSON.stringify(objects);
 }
