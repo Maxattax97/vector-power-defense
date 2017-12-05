@@ -4,7 +4,9 @@ const path = require("path");
 const crypto = require("crypto");
 
 const SocketServer = require("ws").Server;
-const MongoClient = require("mongodb").MongoClient;
+const mongodb = require("mongodb");
+const MongoClient = mongodb.MongoClient;
+const ObjectID = mongodb.ObjectID;
 const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
@@ -14,11 +16,12 @@ const session = require("express-session");
 //var router = express.Router();
 
 const app = express();
-
+const cookieSecret = require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret;
 const credentials = {
     key: fs.readFileSync(__dirname + "/security/privateKey.pem").toString(),
     cert: fs.readFileSync(__dirname + "/security/certificate.pem").toString(),
 };
+
 
 app.use(express.static("public"));
 app.use(helmet()); // Security enhancements.
@@ -28,14 +31,18 @@ app.use(bodyParser.urlencoded({
 }));
 // TODO: Implement MongoDB session persistence for production environment.
 app.set("trust proxy", 1);
-app.use(session({
+const sessionParser = session({
     cookie: {
         secure: true,
     },
-    secret: require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret,
+    secret: cookieSecret,
     resave: true,
     saveUninitialized: false,
-}));
+});
+app.use(sessionParser);
+
+// HACK: We have to wait for a single request to fetch the store.
+var sessionStore = null;
 
 const port = process.env.PORT || 2701;
 const publicHtmlDir = __dirname + "/../client/";
@@ -53,168 +60,193 @@ redirectApp.get("*", function(req, res) {
 const redirectServer = redirectApp.listen(port - 1);
 
 // Create one more server for handling websockets. Wrapped in Express.
-const wss = new SocketServer({ server: httpsServer });
-
-//////////////////////
-// WEBSOCKET SERVER //
-//////////////////////
-
-// Lists of all game objects
-var creeps = [];
-var buildings = [];
-var connections = [];
-var numConnections = 0;
-
-wss.on("connection", function connection(ws)
-{
-    console.log("connection ...");
-    console.log(numConnections);
-    var currConnections = ++numConnections;
-    if (currConnections > 5)
-    {
-        ws.deny = true;
-    }
-    connections.push(ws);
-
-    ws.on("message", function incoming(message)
-    {
-        var response;
-        if (message === "Assign Player")
-        {
-            response = initializePlayer(currConnections);
-            /*if (currConnections === 5)
-            {
-                for (var socket in connections)
-                {
-                    socket.send("Start");
-                }
-            }*/
-        }
-        else
-        {
-            response = updateObjects(message);
-        }
-        ws.send(response);
-    });
-    //ws.send("message from server at: " + new Date());
+const wss = new SocketServer({
+    server: httpsServer,
+    verifyClient: (info, done) => {
+        sessionParser(info.req, {}, () => {
+            done(info.req.session.userId);
+        });
+    },
 });
 
-function initializePlayer(currConnections)
-{
-    var playerInfo = {};
-    playerInfo.isDefense = true;
-    playerInfo.playerInfo = true;
-    playerInfo.play = true;
-    switch (currConnections)
-    {
-        case 1:
-            playerInfo.isDefense = false;
-            playerInfo.xpos = 1/2;
-            playerInfo.ypos = 1/2;
-            break;
-        case 2:
-            playerInfo.xpos = 1/16;
-            playerInfo.ypos = 1/16;
-            break;
-        case 3:
-            playerInfo.xpos = 15/16;
-            playerInfo.ypos = 1/16;
-            break;
-        case 4:
-            playerInfo.xpos = 1/16;
-            playerInfo.ypos = 15/16;
-            break;
-        case 5:
-            playerInfo.xpos = 15/16;
-            playerInfo.ypos = 15/16;
-            playerInfo.play = true;
-            break;
-    }
-    return JSON.stringify(playerInfo);
-}
-
-// Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
-function updateObjects(message)
-{
-    var changes = JSON.parse(message);
-    var i;
-    var creep;
-    var building;
-    for (building in changes.newBuildings)
-    {
-        console.log(building.string);
-        buildings.push(building);
-    }
-    for (building in changes.changedBuilding)
-    {
-        for (i = 0; i < buildings.length; i++)
-        {
-            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
-            {
-                buildings[i] = building;
-                break;
-            }
-        }
-    }
-    for (building in changes.removedBuilding)
-    {
-        for (i = 0; i < buildings.length; i++)
-        {
-            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
-            {
-                buildings.splice(i, i+1);
-                break;
-            }
-        }
-    }
-    for (creep in changes.newCreeps)
-    {
-        creeps.push(creep);
-    }
-    for (creep in changes.changedCreeps)
-    {
-        for (i = 0; i < creeps.length; i++)
-        {
-            if (creeps[i].creepID === creep.creepID)
-            {
-                creeps[i] = creep;
-                break;
-            }
-        }
-    }
-    for (creep in changes.removedCreeps)
-    {
-        for (i = 0; i < creeps.length; i++)
-        {
-            if (creeps[i].creepID === creep.creepID)
-            {
-                creeps.splice(i, i+1);
-                break;
-            }
-        }
-    }
-    var objects =
-    {
-        "playerInfo" : false,
-        "play" : true,
-        "creeps" : creeps,
-        "buildings" : buildings,
-    };
-    if (buildings.length !== 0)
-    {
-        console.log(buildings[0].xposition);
-    }
-    return JSON.stringify(objects);
-}
-
-/////////////////
-// HTTP SERVER //
-/////////////////
 
 MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
+    //////////////////////
+    // WEBSOCKET SERVER //
+    //////////////////////
+
+    // Lists of all game objects
+    var creeps = [];
+    var buildings = [];
+    var lobbies = [];
+    var lobbyNum = 0;
+    const lobbySize = 2;
+
+    wss.on("connection", function connection(ws, req)
+    {
+        const userId = `${req.session.userId}:${Date.now()}`;
+        console.log(`User ${userId} connected`);
+
+        lobbies[lobbyNum] = lobbies[lobbyNum] || {};
+        const lobby = lobbies[lobbyNum];
+        lobby[userId] = ws;
+
+        let lobbyKeys = Object.keys(lobby);
+        var i;
+
+        if (lobbyKeys.length >= lobbySize) {
+            for (i = 0; i < lobbyKeys.length; i++) {
+                const ws_temp = lobby[lobbyKeys[i]];
+                if (ws_temp.readyState !== 1) {
+                    delete lobby[lobbyKeys[i]];
+                }
+            }
+
+            lobbyKeys = Object.keys(lobby);
+            console.log(`${lobbyKeys.length} players`);
+
+            if (lobbyKeys.length >= lobbySize) {
+                console.log("Started game");
+
+                for (i = 0; i < lobbyKeys.length; i++) {
+                    const ws_temp = lobby[lobbyKeys[i]];
+                    const response = initializePlayer(i);
+                    ws_temp.send(response);
+                }
+
+                lobbyNum += 1;
+            }
+        }
+
+        wss.on("close", function close() {
+            console.log(`User ${userId} left`);
+            delete lobby[userId];
+        });
+
+        ws.on("message", function incoming(message)
+        {
+            const response = updateObjects(message);
+            ws.send(response);
+        });
+
+        // db.collection("accounts", {}, function(err, col) {
+        //     col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
+        //     });
+        // });
+
+    });
+
+    function initializePlayer(currConnections)
+    {
+        var playerInfo = {};
+        playerInfo.isDefense = true;
+        playerInfo.playerInfo = true;
+        playerInfo.play = true;
+        playerInfo.start = true;
+        switch (currConnections)
+        {
+            case 1:
+                playerInfo.isDefense = false;
+                playerInfo.xpos = 1/2;
+                playerInfo.ypos = 1/2;
+                break;
+            case 2:
+                playerInfo.xpos = 1/16;
+                playerInfo.ypos = 1/16;
+                break;
+            case 3:
+                playerInfo.xpos = 15/16;
+                playerInfo.ypos = 1/16;
+                break;
+            case 4:
+                playerInfo.xpos = 1/16;
+                playerInfo.ypos = 15/16;
+                break;
+            case 5:
+                playerInfo.xpos = 15/16;
+                playerInfo.ypos = 15/16;
+                playerInfo.play = true;
+                break;
+        }
+        return JSON.stringify(playerInfo);
+    }
+
+    // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
+    function updateObjects(message)
+    {
+        var changes = JSON.parse(message.data);
+        var i;
+        var creep;
+        var building;
+        for (building in changes.newBuildings)
+        {
+            buildings.push(building);
+        }
+        for (building in changes.changedBuilding)
+        {
+            for (i = 0; i < buildings.length; i++)
+            {
+                if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+                {
+                    buildings[i] = building;
+                    break;
+                }
+            }
+        }
+        for (building in changes.removedBuilding)
+        {
+            for (i = 0; i < buildings.length; i++)
+            {
+                if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+                {
+                    buildings.splice(i, i+1);
+                    break;
+                }
+            }
+        }
+        for (creep in changes.newCreeps)
+        {
+            creeps.push(creep);
+        }
+        for (creep in changes.changedCreeps)
+        {
+            for (i = 0; i < creeps.length; i++)
+            {
+                if (creeps[i].creepID === creep.creepID)
+                {
+                    creeps[i] = creep;
+                    break;
+                }
+            }
+        }
+        for (creep in changes.removedCreeps)
+        {
+            for (i = 0; i < creeps.length; i++)
+            {
+                if (creeps[i].creepID === creep.creepID)
+                {
+                    creeps.splice(i, i+1);
+                    break;
+                }
+            }
+        }
+        var objects;
+        objects.playerInfo = false;
+        objects.play = true;
+        objects.creeps = creeps;
+        objects.buildings = buildings;
+        return JSON.stringify(objects);
+    }
+
+    //////////////////////////
+    // HTTPS EXPRESS SERVER //
+    //////////////////////////
+
     app.post("/auth", function(req, res) {
-        console.log("Received a POST request at /auth");
+        trySaveSessionStore(req.sessionStore);
+
         if (req.session.userId) {
+            console.log(req.session.userId);
             res.redirect("/game");
             return;
         }
@@ -233,14 +265,14 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                         col.findOne({username: req.body.username}, {}).then(function(doc) {
                             if (! doc) {
                                 delete req.session.userId;
-                                res.redirect("/?msg=User+Does+Not+Exist&color=red");
+                                res.redirect("/login.html?msg=User+Does+Not+Exist&color=red");
                             } else {
                                 var saltBuf = Buffer.from(doc.salt, "hex");
                                 crypto.pbkdf2(req.body.password, saltBuf, doc.iterations, 256, "sha256", function(err, passHash) {
                                     if (err) {
                                         console.error(err);
                                         delete req.session.userId;
-                                        res.redirect("/?msg=Internal+Error&color=red");
+                                        res.redirect("/login.html?msg=Internal+Error&color=red");
                                     } else if (passHash.toString("hex") === doc.hash) {
                                         console.log(req.body.username + " [ ID", doc._id, "] succesfully authenticated");
                                         req.session.userId = doc._id;
@@ -252,39 +284,42 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                                         }
                                         req.session.loginAttempts++;
                                         console.log("Failed login attempt (" + req.session.loginAttempts + ")");
-                                        res.redirect("/?msg=Incorrect+Password&color=red");
+                                        res.redirect("/login.html?msg=Incorrect+Password&color=red");
                                     }
                                 });
                             }
                         }).catch(function(err) {
                             console.error(err);
                             delete req.session.userId;
-                            res.redirect("/?msg=Internal+Error&color=red");
+                            res.redirect("/login.html?msg=Internal+Error&color=red");
                         });
                     }
                 });
             }
         } else {
             delete req.session.userId;
-            res.redirect("/?msg=Login+Failed&color=red");
+            res.redirect("/login.html?msg=Login+Failed&color=red");
         }
     });
 
     app.post("/logout", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         delete req.session.userId;
-        res.redirect("/?msg=Logged+Out&color=green");
+        res.redirect("/login.html?msg=Logged+Out&color=green");
     });
 
     app.get("/logout", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         delete req.session.userId;
-        res.redirect("/?msg=Logged+Out&color=green");
+        res.redirect("/login.html?msg=Logged+Out&color=green");
     });
 
     app.post("/newaccount", function(req, res) {
-        console.log("Receive a POST request at /newaccount");
-        if (req.body && req.body.email && req.body.username && req.body.password) {
-            // Check that username and email are not yet in use.
+        trySaveSessionStore(req.sessionStore);
 
+        if (req.body && req.body.email && req.body.username && req.body.password) {
             var iterations = 100000;
             crypto.randomBytes(128, function(err, saltBuf) {
                 crypto.pbkdf2(req.body.password, saltBuf, iterations, 256, "sha256", function(err, passHash) {
@@ -294,31 +329,25 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                             return;
                         }
 
-                        console.log({
-                            email: req.body.email,
-                            username: req.body.username,
-                            iterations: iterations,
-                            salt: saltBuf.toString("hex"),
-                            hash: passHash.toString("hex"),
-                            statistics: {
-                                highscore: 0,
-                            },
-                        });
-
-                        col.insertOne({
-                            email: req.body.email,
-                            username: req.body.username,
-                            iterations: iterations,
-                            salt: saltBuf.toString("hex"),
-                            hash: passHash.toString("hex"),
-                            statistics: {
-                                highscore: 0,
-                            },
-                        }, {}).then(function() {
-                            console.log("Sucesfully created a new account for " + req.body.username);
-                            res.redirect("/?msg=Account+Created&color=green");
-                        }).catch(function(err) {
-                            console.error(err);
+                        checkExistingAccount(req.body.username, req.body.email).then(function() {
+                            col.insertOne({
+                                email: req.body.email,
+                                username: req.body.username,
+                                iterations: iterations,
+                                salt: saltBuf.toString("hex"),
+                                hash: passHash.toString("hex"),
+                                statistics: {
+                                    highscore: 0,
+                                },
+                            }, {}).then(function() {
+                                console.log("Sucesfully created a new account for " + req.body.username);
+                                res.redirect("/?msg=Account+Created&color=green");
+                            }).catch(function(err) {
+                                console.error(err);
+                                res.redirect("/egister?msg=Internal+Error&color=red");
+                            });
+                        }).catch(function() {
+                            res.redirect("/register?msg=Account+Exists&color=red");
                         });
                     });
                 });
@@ -329,18 +358,24 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     });
 
     app.get("/game", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         if (req.session.userId) {
             res.sendFile(path.resolve(publicHtmlDir + "game.html"));
         } else {
-            res.redirect("/");
+            res.redirect("/login.html");
         }
     });
 
     app.get("/register", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         res.sendFile(path.resolve(publicHtmlDir + "register.html"));
     });
 
     app.get("/", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         if (req.session.userId) {
             res.redirect("/game");
         } else {
@@ -352,17 +387,45 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     function shutdown() {
         if (shutdownMutex <= 0) {
             shutdownMutex = 1;
-            console.log("MongoDB closing ...");
+            console.log("Server shutting down ...");
             db.close();
-            console.log("HTTPS server closing ...");
             httpsServer.close();
-            console.log("HTTP redirect server closing ...");
             redirectServer.close();
-            console.log("WS server closing ...");
             wss.close();
             console.log("Shutdown process complete");
             shutdownMutex = 2;
         }
+    }
+
+    function trySaveSessionStore(store) {
+        if (!sessionStore) {
+            sessionStore = store;
+            console.log("Fetched and saved reference to session store");
+            console.log(sessionStore);
+        }
+    }
+
+    function checkExistingAccount(username, email) {
+        return new Promise(function(resolve, reject) {
+            db.collection("accounts", {}, function(err, col) {
+                if (err) {
+                    reject(err);
+                }
+
+                col.find({$or: [
+                    {username: username},
+                    {email: email},
+                ]}).toArray(function(err, docs) {
+                    if (err) {
+                        reject(err);
+                    } else if (docs.length > 0) {
+                        reject(docs);
+                    } else {
+                        resolve(false);
+                    }
+                });
+            });
+        });
     }
 
     process.on("SIGINT", shutdown);
