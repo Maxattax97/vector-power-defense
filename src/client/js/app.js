@@ -53,7 +53,7 @@ ws.onopen = function() {
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
 
-    console.log("c", changes);
+    // console.log("c", changes);
     if (changes.playerInfo)
     {
         world = new World(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -130,31 +130,35 @@ window.addEventListener("click", function(e){
     }
     else
     {
-        console.log(world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition));
-        if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
-        {
-            var type;
-            if (player.isDefense)
+        if (buildType) {
+
+            console.log(world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition));
+            if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
             {
-                type = defenseTypes[buildType - 1];
-            }
-            else
-            {
-                type = offenseTypes[buildType - 1];
-            }
-            var building = player.purchaseBuilding(e.clientX, e.clientY, type);
-            if ((building))
-            {
-                world.addBuilding(building);
-                newBuildings.push(building);
-                for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
+                var type;
+                if (player.isDefense)
                 {
-                    for (var y = building.yposition; y < building.yposition + BUILDSIZE; y++)
+                    type = defenseTypes[buildType - 1];
+                }
+                else
+                {
+                    type = offenseTypes[buildType - 1];
+                }
+                var building = player.purchaseBuilding(e.clientX, e.clientY, type);
+                if (building)
+                {
+                    world.addBuilding(building);
+                    newBuildings.push(building);
+                    for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
                     {
-                        buildMap[x][y] = building;
+                        for (var y = building.yposition; y < building.yposition + BUILDSIZE; y++)
+                        {
+                            buildMap[x][y] = building;
+                        }
                     }
                 }
             }
+
         }
     }
 });
@@ -231,7 +235,7 @@ const onload = function () {
 
     function setInitialState()
     {
-        world.calculatePathing();
+        // world.calculatePathing();
     }
 
     function addWorld(list) {

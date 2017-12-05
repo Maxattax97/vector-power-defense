@@ -197,15 +197,15 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     function updateObjects(message, lobby)
     {
         var changes = JSON.parse(message);
-        var i;
+        var i, j;
         var creep;
         var building;
-        for (var i = 0; i < changes.newBuildings.length; i++) {
+        for (i = 0; i < changes.newBuildings.length; i++) {
             building = changes.newBuildings[i];
             lobby.buildings.push(building);
         }
-        for (var i = 0; i < changes.changedBuildings.length; i++) {
-            building = changes.changedBuildings[i];
+        for (j = 0; j < changes.changedBuildings.length; j++) {
+            building = changes.changedBuildings[j];
             console.log("found", building);
             for (i = 0; i < lobby.buildings.length; i++)
             {
@@ -216,8 +216,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (var i = 0; i < changes.removedBuildings.length; i++) {
-            building = changes.removedBuildings[i];
+        for (j = 0; j < changes.removedBuildings.length; j++) {
+            building = changes.removedBuildings[j];
             for (i = 0; i < lobby.buildings.length; i++)
             {
                 if (lobby.buildings[i].xposition === building.xposition && lobby.buildings[i].yposition === building.yposition)
@@ -231,8 +231,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
             creep = changes.newCreeps[i];
             lobby.creeps.push(creep);
         }
-        for (var i = 0; i < changes.changedCreeps.length; i++) {
-            creep = changes.changedCreeps[i];
+        for (var j = 0; j < changes.changedCreeps.length; j++) {
+            creep = changes.changedCreeps[j];
             for (i = 0; i < lobby.creeps.length; i++)
             {
                 if (lobby.creeps[i].creepID === creep.creepID)
@@ -242,8 +242,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (var i = 0; i < changes.removedCreeps.length; i++) {
-            creep = changes.removedCreeps[i];
+        for (var j = 0; j < changes.removedCreeps.length; j++) {
+            creep = changes.removedCreeps[j];
             for (i = 0; i < lobby.creeps.length; i++)
             {
                 if (lobby.creeps[i].creepID === creep.creepID)
