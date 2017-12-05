@@ -57,6 +57,7 @@ ws.onmessage = function(message) {
     if (changes.playerInfo)
     {
         const elem = document.getElementById("highscore");
+        window.score = changes.highscore;
         elem.innerText = `highscore: ${changes.highscore}`;
 
         world = new World(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -316,6 +317,13 @@ window.onload = function() {
     const canvas = document.getElementById("canvas");
     paper.setup(canvas);
 
+    const mylogout = document.getElementById("logout");
+    mylogout.onclick = function() {
+        ws.send({
+            highscore: window.score;
+        });
+    }
+
     canvas.addEventListener("click", function(e){
         if (buildType === "Sell")
         {
@@ -350,6 +358,10 @@ window.onload = function() {
                     var building = player.purchaseBuilding(xClick, yClick, type);
                     if (building)
                     {
+                        const elem = document.getElementById("highscore");
+                        window.score = window.score + 1;
+                        elem.innerText = `highscore: ${window.score}`;
+
                         world.addBuilding(building);
                         newBuildings.push(building);
                         for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
