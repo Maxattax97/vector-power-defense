@@ -189,20 +189,20 @@ class Player
 
     receiveIncome()
     {
-        if(this.incomeTick < INCOMEDELAY)
+        if (this.incomeTick < INCOMEDELAY)
         {
             this.incomeTick++;
             return;
         }
-        if(this.isDefense)
+        if (this.isDefense)
         {
             this.resources += this.powerNode.income;
         }
         else
         {
-            for(var spawner in this.buildings)
+            for (var spawner in this.buildings)
             {
-                this.resources += this.spawner.income;
+                this.resources += spawner.income;
             }
         }
     }
