@@ -45,30 +45,6 @@ ws.onopen = function() {
     console.log("Connection established");
 };
 
-ws.onmessage = function(message) {
-    var changes = JSON.parse(message.data);
-
-    console.log("Changes: ", changes);
-
-    if (changes.playerInfo === true)
-    {
-        world = new World(WIDTH, HEIGHT);
-        player = new Player(changes.xpos * WIDTH, changes.ypos * HEIGHT, world, changes.isDefense, 4);
-        if (changes.isDefense)
-        {
-            newBuildings.push(player.powerNode);
-            world.addBuilding(player.powerNode);
-        }
-    }
-    else
-    {
-        world.creeps = changes.creeps;
-        world.buildings = changes.buildings;
-        console.log(world.string);
-    }
-    play = changes.play;
-};
-
 window.onload = function() {
     const canvas = document.getElementById("canvas");
     paper.setup(canvas);
@@ -277,4 +253,34 @@ function promoteListener(e)
 
     setInitialState();
     main(performance.now()); // Start the cycle
+
+    ws.onmessage = function(message) {
+        var changes = JSON.parse(message.data);
+
+        console.log("Changes: ", changes);
+
+        if (changes.playerInfo === true)
+        {
+            world = new World(WIDTH, HEIGHT);
+            player = new Player(changes.xpos * WIDTH, changes.ypos * HEIGHT, world, changes.isDefense, 4);
+            if (changes.isDefense)
+            {
+                newBuildings.push(player.powerNode);
+                world.addBuilding(player.powerNode);
+            }
+        }
+        else
+        {
+            world.creeps = changes.creeps;
+            world.buildings = changes.buildings;
+            console.log(world.string);
+        }
+
+        play = changes.play;
+
+        if (changes.start) {
+            main(performance.now());
+        }
+    };
+
 })();
