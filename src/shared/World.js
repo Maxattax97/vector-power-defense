@@ -22,9 +22,9 @@ class World
         this.creeps = [];
         this.xsize = xsize;
         this.ysize = ysize;
-        for (var x = 0; x < xsize; x++) {
+        for (var x = 0; x < 16; x++) {
             this.map[x] = [];
-            for (var y = 0; y < ysize; y++) {
+            for (var y = 0; y < 16; y++) {
                 this.map[x][y] = new Tile(x, y, "#444444", true, true);
             }
         }
@@ -49,53 +49,58 @@ class World
 
     isValidSpot(buildx, buildy, playerx, playery)
     {
-        if (playerx === this.xsize/16)
-        {
-            if (playery === this.ysize/16)
-            {
-                // Tower built in upper left
-                if (!(0 < buildx && buildx < this.xsize/3 && 0 < buildy && buildy < this.ysize/2))
-                {
-                    return false;
-                }
-            }
-            else if (playery === this.ysize * (15/16))
-            {
-                // Tower built in lower left
-                if (!(0 < buildx && buildx < this.xsize/3 && this.ysize/2 < buildy && buildy < this.ysize))
-                {
-                    return false;
-                }
-            }
-        }
-        else if (playerx === this.xsize * (15/16))
-        {
-            if (playery === this.ysize/16)
-            {
-                // Tower built in upper right
-                if (!(this.xsize * (2/3) < buildx && buildx < this.xsize && 0 < buildy && buildy < this.ysize/2))
-                {
-                    return false;
-                }
-            }
-            else if (playery === this.ysize * (15/16))
-            {
-                // Tower built in lower right
-                if (!(this.xsize * (2/3) < buildx && buildx < this.xsize && this.ysize/2 < buildy && buildy < this.ysize))
-                {
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            // Spawner built in spawning area
-            if (!(this.xsize * (1/3) < buildx && buildx < this.xsize * (2/3)))
-            {
-                return false;
-            }
-        }
-        return this.map[buildx][buildy].isBuildable;
+        // console.log(playerx, playery);
+        // if (playerx === this.xsize/16)
+        // {
+        //     if (playery === this.ysize/16)
+        //     {
+        //         // Tower built in upper left
+        //         if (!(0 < buildx && buildx < this.xsize/3 && 0 < buildy && buildy < this.ysize/2))
+        //         {
+        //             return false;
+        //         }
+        //     }
+        //     else if (playery === this.ysize * (15/16))
+        //     {
+        //         // Tower built in lower left
+        //         if (!(0 < buildx && buildx < this.xsize/3 && this.ysize/2 < buildy && buildy < this.ysize))
+        //         {
+        //             return false;
+        //         }
+        //     }
+        // }
+        // else if (playerx === this.xsize * (15/16))
+        // {
+        //     if (playery === this.ysize/16)
+        //     {
+        //         // Tower built in upper right
+        //         if (!(this.xsize * (2/3) < buildx && buildx < this.xsize && 0 < buildy && buildy < this.ysize/2))
+        //         {
+        //             return false;
+        //         }
+        //     }
+        //     else if (playery === this.ysize * (15/16))
+        //     {
+        //         // Tower built in lower right
+        //         if (!(this.xsize * (2/3) < buildx && buildx < this.xsize && this.ysize/2 < buildy && buildy < this.ysize))
+        //         {
+        //             return false;
+        //         }
+        //     }
+        // }
+        // else
+        // {
+        //     // Spawner built in spawning area
+        //     if (!(this.xsize * (1/3) < buildx && buildx < this.xsize * (2/3)))
+        //     {
+        //         return false;
+        //     }
+        // }
+        return ((this.map[buildx] || {})[buildy] || {}).isBuildable;
+    }
+
+    buildable(x, y) {
+        return ((this.map[buildx] || {})[buildy] || {}).isBuildable;
     }
 
     addBuilding(building)
@@ -107,7 +112,7 @@ class World
         {
             for (y = building.yposition; y < building.yposition + BUILDSIZE; y++)
             {
-                this.map[x][y].isBuildable = false;
+                ((this.map[x] || {})[y] || {}).isBuildable = false;
             }
         }
 

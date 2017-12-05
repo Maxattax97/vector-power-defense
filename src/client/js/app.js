@@ -314,7 +314,6 @@ window.onload = function() {
     paper.setup(canvas);
 
     canvas.addEventListener("click", function(e){
-
         if (buildType === "Sell")
         {
             sell(e);
@@ -330,9 +329,11 @@ window.onload = function() {
         else
         {
             if (buildType > 0) {
+                const xClick = Math.floor(e.clientX / 40);
+                const yClick = Math.floor(e.clientX / 40);
+                console.log(xClick, yClick);
 
-                console.log(world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition));
-                if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
+                if (world.isValidSpot(xClick, yClick, player.xposition, player.yposition))
                 {
                     var type;
                     if (player.isDefense)
@@ -343,7 +344,7 @@ window.onload = function() {
                     {
                         type = offenseTypes[buildType - 1];
                     }
-                    var building = player.purchaseBuilding(e.clientX, e.clientY, type);
+                    var building = player.purchaseBuilding(xClick, yClick, type);
                     if (building)
                     {
                         world.addBuilding(building);
