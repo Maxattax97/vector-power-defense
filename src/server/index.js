@@ -4,7 +4,9 @@ const path = require("path");
 const crypto = require("crypto");
 
 const SocketServer = require("ws").Server;
-const MongoClient = require("mongodb").MongoClient;
+const mongodb = require("mongodb");
+const MongoClient = mongodb.MongoClient;
+const ObjectID = mongodb.ObjectID;
 const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
@@ -30,15 +32,15 @@ app.use(bodyParser.urlencoded({
 }));
 // TODO: Implement MongoDB session persistence for production environment.
 app.set("trust proxy", 1);
-app.use(cookieParser(cookieSecret));
-app.use(session({
+const sessionParser = session({
     cookie: {
         secure: true,
     },
     secret: cookieSecret,
     resave: true,
     saveUninitialized: false,
-}));
+});
+app.use(sessionParser);
 
 // HACK: We have to wait for a single request to fetch the store.
 var sessionStore = null;
@@ -59,180 +61,168 @@ redirectApp.get("*", function(req, res) {
 const redirectServer = redirectApp.listen(port - 1);
 
 // Create one more server for handling websockets. Wrapped in Express.
-const wss = new SocketServer({ server: httpsServer });
-
-//////////////////////
-// WEBSOCKET SERVER //
-//////////////////////
-
-// Lists of all game objects
-var creeps = [];
-var buildings = [];
-var numConnections = 0;
-
-wss.on("connection", function connection(ws)
-{
-    console.log("Websocket connection established ...");
-
-    getAccountFromCookie(ws).then(function(sess) {
-        console.log(sess);
-        //var account = sess;
-
-        var currConnections = ++numConnections;
-        if (numConnections > 5)
-        {
-            ws.deny = true;
-        }
-
-        ws.on("message", function incoming(message)
-        {
-            var response;
-            if (message === "Assign Player")
-            {
-                response = initializePlayer(currConnections);
-            }
-            else
-            {
-                response = updateObjects(message);
-            }
-            ws.send(response);
+const wss = new SocketServer({
+    server: httpsServer,
+    verifyClient: (info, done) => {
+        sessionParser(info.req, {}, () => {
+            done(info.req.session.userId);
         });
-
-        //ws.send("message from server at: " + new Date());
-    }).catch(function(err) {
-        console.error(err);
-    });
+    },
 });
 
-function initializePlayer(currConnections)
-{
-    var playerInfo;
-    playerInfo.isDefense = true;
-    playerInfo.playerInfo = true;
-    playerInfo.play = false;
-    switch (currConnections)
-    {
-        case 1:
-            playerInfo.isDefense = false;
-            playerInfo.xpos = 1/2;
-            playerInfo.ypos = 1/2;
-            break;
-        case 2:
-            playerInfo.xpos = 1/16;
-            playerInfo.ypos = 1/16;
-            break;
-        case 3:
-            playerInfo.xpos = 15/16;
-            playerInfo.ypos = 1/16;
-            break;
-        case 4:
-            playerInfo.xpos = 1/16;
-            playerInfo.ypos = 15/16;
-            break;
-        case 5:
-            playerInfo.xpos = 15/16;
-            playerInfo.ypos = 15/16;
-            playerInfo.play = true;
-            break;
-    }
-    return JSON.stringify(playerInfo);
-}
-
-// Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
-function updateObjects(message)
-{
-    var changes = JSON.parse(message.data);
-    var i;
-    var creep;
-    var building;
-    for (building in changes.newBuildings)
-    {
-        buildings.push(building);
-    }
-    for (building in changes.changedBuilding)
-    {
-        for (i = 0; i < buildings.length; i++)
-        {
-            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
-            {
-                buildings[i] = building;
-                break;
-            }
-        }
-    }
-    for (building in changes.removedBuilding)
-    {
-        for (i = 0; i < buildings.length; i++)
-        {
-            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
-            {
-                buildings.splice(i, i+1);
-                break;
-            }
-        }
-    }
-    for (creep in changes.newCreeps)
-    {
-        creeps.push(creep);
-    }
-    for (creep in changes.changedCreeps)
-    {
-        for (i = 0; i < creeps.length; i++)
-        {
-            if (creeps[i].creepID === creep.creepID)
-            {
-                creeps[i] = creep;
-                break;
-            }
-        }
-    }
-    for (creep in changes.removedCreeps)
-    {
-        for (i = 0; i < creeps.length; i++)
-        {
-            if (creeps[i].creepID === creep.creepID)
-            {
-                creeps.splice(i, i+1);
-                break;
-            }
-        }
-    }
-    var objects;
-    objects.playerInfo = false;
-    objects.play = true;
-    objects.creeps = creeps;
-    objects.buildings = buildings;
-    return JSON.stringify(objects);
-}
-
-function getAccountFromCookie(ws) {
-    return new Promise(function(resolve, reject) {
-        cookieParser(ws.upgradeReq, null, function(err) {
-            if (err) {
-                reject(err);
-            } else {
-                var sessionId = ws.upgradeReq.signedCookies["connect.sid"];
-                sessionStore.get(sessionId, function(err, sess) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(sess);
-                    }
-                });
-            }
-        });
-    });
-}
-
-//////////////////////////
-// HTTPS EXPRESS SERVER //
-//////////////////////////
 
 MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
+    //////////////////////
+    // WEBSOCKET SERVER //
+    //////////////////////
+
+    // Lists of all game objects
+    var creeps = [];
+    var buildings = [];
+    var numConnections = 0;
+
+    wss.on("connection", function connection(ws, req)
+    {
+        console.log(`connection from user ${req.session.userId}`);
+
+        db.collection("accounts", {}, function(err, col) {
+            col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
+                console.log(account);
+
+                var currConnections = ++numConnections;
+                if (numConnections > 5)
+                {
+                    ws.deny = true;
+                }
+
+                ws.on("message", function incoming(message)
+                {
+                    var response;
+                    if (message === "Assign Player")
+                    {
+                        response = initializePlayer(currConnections);
+                    }
+                    else
+                    {
+                        response = updateObjects(message);
+                    }
+                    ws.send(response);
+                });
+                //ws.send("message from server at: " + new Date());
+            });
+        });
+    });
+
+    function initializePlayer(currConnections)
+    {
+        var playerInfo = {};
+        playerInfo.isDefense = true;
+        playerInfo.playerInfo = true;
+        playerInfo.play = false;
+        switch (currConnections)
+        {
+            case 1:
+                playerInfo.isDefense = false;
+                playerInfo.xpos = 1/2;
+                playerInfo.ypos = 1/2;
+                break;
+            case 2:
+                playerInfo.xpos = 1/16;
+                playerInfo.ypos = 1/16;
+                break;
+            case 3:
+                playerInfo.xpos = 15/16;
+                playerInfo.ypos = 1/16;
+                break;
+            case 4:
+                playerInfo.xpos = 1/16;
+                playerInfo.ypos = 15/16;
+                break;
+            case 5:
+                playerInfo.xpos = 15/16;
+                playerInfo.ypos = 15/16;
+                playerInfo.play = true;
+                break;
+        }
+        return JSON.stringify(playerInfo);
+    }
+
+    // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
+    function updateObjects(message)
+    {
+        var changes = JSON.parse(message.data);
+        var i;
+        var creep;
+        var building;
+        for (building in changes.newBuildings)
+        {
+            buildings.push(building);
+        }
+        for (building in changes.changedBuilding)
+        {
+            for (i = 0; i < buildings.length; i++)
+            {
+                if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+                {
+                    buildings[i] = building;
+                    break;
+                }
+            }
+        }
+        for (building in changes.removedBuilding)
+        {
+            for (i = 0; i < buildings.length; i++)
+            {
+                if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+                {
+                    buildings.splice(i, i+1);
+                    break;
+                }
+            }
+        }
+        for (creep in changes.newCreeps)
+        {
+            creeps.push(creep);
+        }
+        for (creep in changes.changedCreeps)
+        {
+            for (i = 0; i < creeps.length; i++)
+            {
+                if (creeps[i].creepID === creep.creepID)
+                {
+                    creeps[i] = creep;
+                    break;
+                }
+            }
+        }
+        for (creep in changes.removedCreeps)
+        {
+            for (i = 0; i < creeps.length; i++)
+            {
+                if (creeps[i].creepID === creep.creepID)
+                {
+                    creeps.splice(i, i+1);
+                    break;
+                }
+            }
+        }
+        var objects;
+        objects.playerInfo = false;
+        objects.play = true;
+        objects.creeps = creeps;
+        objects.buildings = buildings;
+        return JSON.stringify(objects);
+    }
+
+    //////////////////////////
+    // HTTPS EXPRESS SERVER //
+    //////////////////////////
+
     app.post("/auth", function(req, res) {
         trySaveSessionStore(req.sessionStore);
 
         if (req.session.userId) {
+            console.log(req.session.userId);
             res.redirect("/game");
             return;
         }
@@ -306,7 +296,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         trySaveSessionStore(req.sessionStore);
 
         if (req.body && req.body.email && req.body.username && req.body.password) {
-            // Check that username and email are not yet in use.
+            // TODO: Check that username and email are not yet in use.
 
             var iterations = 100000;
             crypto.randomBytes(128, function(err, saltBuf) {
