@@ -102,9 +102,10 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         lobby[userId] = ws;
 
         let lobbyKeys = Object.keys(lobby);
-        var i;
 
         if (lobbyKeys.length >= lobbySize) {
+            let i;
+
             for (i = 0; i < lobbyKeys.length; i++) {
                 const ws_temp = lobby[lobbyKeys[i]];
                 if (ws_temp.readyState !== 1) {
@@ -139,7 +140,15 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         ws.on("message", function incoming(message)
         {
             const response = updateObjects(message, lobby);
-            ws.send(response);
+
+            let lobbyKeys = Object.keys(lobby);
+
+            for (let i = 0; i < lobbyKeys.length; i++) {
+                const ws_temp = lobby[lobbyKeys[i]];
+                if (ws_temp.readyState === 1) {
+                    ws.send(response);
+                }
+            }
         });
 
         // db.collection("accounts", {}, function(err, col) {
