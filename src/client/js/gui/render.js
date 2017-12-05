@@ -2,9 +2,9 @@
 const paper = require("paper");
 const {Point, Path, Color, Group} = paper;
 const settings = {
-    canvasSize: 600,
-    shownSquares: 30,
-    squareSize: 600 / 30,
+    canvasSize: 640,
+    shownSquares: 16,
+    squareSize: 640 / 16,
     borderSize: 1,
 };
 
@@ -90,25 +90,26 @@ function shootSplash(a, b, items, splashRange) {
 }
 
 var drawGridLines = function(num_rectangles_wide, num_rectangles_tall, boundingRect) {
+    let i;
     var width_per_rectangle = boundingRect.width / num_rectangles_wide;
     var height_per_rectangle = boundingRect.height / num_rectangles_tall;
-    for (var i = 0; i <= num_rectangles_wide; i++) {
+    for (i = 0; i <= num_rectangles_wide; i++) {
         var xPos = boundingRect.left + i * width_per_rectangle + .5;
         var topPoint = new paper.Point(xPos, boundingRect.top);
         var bottomPoint = new paper.Point(xPos, boundingRect.bottom);
-        var aLine = new paper.Path.Line(topPoint, bottomPoint);
-        aLine.strokeColor = '#303030';
+        let aLine = new paper.Path.Line(topPoint, bottomPoint);
+        aLine.strokeColor = "#303030";
         aLine.sendToBack();
     }
-    for (var i = 0; i <= num_rectangles_tall; i++) {
+    for (i = 0; i <= num_rectangles_tall; i++) {
         var yPos = boundingRect.top + i * height_per_rectangle + .5;
         var leftPoint = new paper.Point(boundingRect.left, yPos);
         var rightPoint = new paper.Point(boundingRect.right, yPos);
-        var aLine = new paper.Path.Line(leftPoint, rightPoint);
-        aLine.strokeColor = '#303030';
+        let aLine = new paper.Path.Line(leftPoint, rightPoint);
+        aLine.strokeColor = "#303030";
         aLine.sendToBack();
     }
-}
+};
 
 function init() {
     drawGridLines(settings.shownSquares, settings.shownSquares, paper.view.bounds);
@@ -123,6 +124,8 @@ function init() {
     rect.sendToBack();
 }
 
+const rendering = {};
+
 function render(world) {
     const colors = [
         "#eeeeee",
@@ -132,8 +135,9 @@ function render(world) {
         "#dd0048",
     ];
 
-    for (var building in world.buildings)
-    {
+    for (var i = 0; i < world.buildings.length; i++) {
+        const building = world.buildings[i]
+
         var color;
         switch (building.buildingType)
         {
@@ -154,16 +158,16 @@ function render(world) {
                 break;
         }
 
-        // const tower = createTower(building.buildingLevel, color);
-        // positionTower(tower, building.xposition, building.yposition);
-    }
+        const id = building.id;
 
-    if (!world.mystart) {
-        console.log('Still?');
-        const tower = createTower(2, '#eeeeee');
-        positionTower(tower, 10, 10);
+        if (!rendering[id]) {
+            console.log('render building', building);
+            const tower = createTower(building.buildingLevel, color);
+            positionTower(tower, building.xposition, building.yposition);
+
+            rendering[building.id] = tower;
+        }
     }
-    world.mystart = true;
 
     // const items = [].concat.apply([], towers);
     // shootBetween(basicTowers[0], basicTowers[1]);

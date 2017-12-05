@@ -1,5 +1,7 @@
 // Script for building classes
 
+let id = 0;
+
 class Building
 {
     /*
@@ -25,6 +27,8 @@ class Building
         this.isCollapsed = false;
         this.isRendered = false;
         this.map = map;
+        this.id = id;
+        id++;
     }
 
     get string()
