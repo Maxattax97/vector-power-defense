@@ -6,14 +6,14 @@ const crypto = require("crypto");
 const SocketServer = require("ws").Server;
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
-const ObjectID = mongodb.ObjectID;
+//const ObjectID = mongodb.ObjectID;
 const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 
 function removeWorld(list) {
-    const list2 = []
+    const list2 = [];
     for (var i = 0; i < list.length; i++) {
         list2[i] = Object.assign({}, list[i]);
         delete list2[i].map;
