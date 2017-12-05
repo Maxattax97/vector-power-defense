@@ -12,6 +12,15 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 
+function removeWorld(list) {
+    const list2 = []
+    for (var i = 0; i < list.length; i++) {
+        list2[i] = Object.assign({}, list[i]);
+        delete list2[i].map;
+    }
+    return list2;
+}
+
 //init Express Router
 //var router = express.Router();
 
@@ -174,7 +183,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
     function updateObjects(message)
     {
-        var changes = JSON.parse(message.data);
+        var changes = JSON.parse(message);
         var i;
         var creep;
         var building;
@@ -230,11 +239,11 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        var objects;
+        var objects = {};
         objects.playerInfo = false;
         objects.play = true;
-        objects.creeps = creeps;
-        objects.buildings = buildings;
+        objects.creeps = removeWorld(creeps);
+        objects.buildings = removeWorld(buildings);
         return JSON.stringify(objects);
     }
 

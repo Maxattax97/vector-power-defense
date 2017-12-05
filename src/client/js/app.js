@@ -212,12 +212,36 @@ function promote(e)
         world.calculatePathing();
     }
 
+    function addWorld(list) {
+        for (var i = 0; i < list.length; i++) {
+            list[i].map = world;
+        }
+        return list;
+    }
+
+    function removeWorld(list) {
+        const list2 = []
+        for (var i = 0; i < list.length; i++) {
+            list2[i] = Object.assign({}, list[i]);
+            delete list2[i].map;
+        }
+        return list2;
+    }
+
     function update(tick)
     {
         if (tick === 0)
         {
             return;
         }
+
+        addWorld(newBuildings);
+        addWorld(changedBuildings);
+        addWorld(removedBuildings);
+        addWorld(newCreeps);
+        addWorld(changedCreeps);
+        addWorld(removedCreeps);
+
         var creep;
         var tower;
         var spawner;
@@ -261,14 +285,15 @@ function promote(e)
 
         var objects =
         {
-            "newBuildings" : newBuildings,
-            "changedBuildings" : changedBuildings,
-            "removedBuildings" : removedBuildings,
-            "newCreeps" : newCreeps,
-            "changedCreeps" : changedCreeps,
-            "removedCreeps" : removedCreeps,
+            newBuildings : removeWorld(newBuildings),
+            changedBuildings : removeWorld(changedBuildings),
+            removedBuildings : removeWorld(removedBuildings),
+            newCreeps : removeWorld(newCreeps),
+            changedCreeps : removeWorld(changedCreeps),
+            removedCreeps : removeWorld(removedCreeps),
         };
-        ws.send(JSON.stringify(Util.inspect(objects)));
+
+        ws.send(JSON.stringify(objects));
         newBuildings = [];
         changedBuildings = [];
         removedBuildings = [];
