@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const SocketServer = require("ws").Server;
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
-//const ObjectID = mongodb.ObjectID;
+const ObjectID = mongodb.ObjectID;
 const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
@@ -94,69 +94,73 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
 
     wss.on("connection", function connection(ws, req)
     {
-        const userId = `${req.session.userId}:${Date.now()}`;
-        console.log(`User ${userId} connected`);
+        db.collection("accounts", {}, function(err, col) {
+            col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
 
-        lobbies[lobbyNum] = lobbies[lobbyNum] || {};
-        const lobby = lobbies[lobbyNum];
-        lobby[userId] = ws;
+                const userId = `${req.session.userId}:${Date.now()}`;
+                console.log(`User ${userId} connected`);
 
-        let lobbyKeys = Object.keys(lobby);
+                lobbies[lobbyNum] = lobbies[lobbyNum] || {};
+                const lobby = lobbies[lobbyNum];
+                lobby[userId] = ws;
 
-        if (lobbyKeys.length >= lobbySize) {
-            let i;
+                let lobbyKeys = Object.keys(lobby);
 
-            for (i = 0; i < lobbyKeys.length; i++) {
-                const ws_temp = lobby[lobbyKeys[i]];
-                if (ws_temp.readyState !== 1) {
-                    delete lobby[lobbyKeys[i]];
+                if (lobbyKeys.length >= lobbySize) {
+                    let i;
+
+                    for (i = 0; i < lobbyKeys.length; i++) {
+                        const ws_temp = lobby[lobbyKeys[i]];
+                        if (ws_temp.readyState !== 1) {
+                            delete lobby[lobbyKeys[i]];
+                        }
+                    }
+
+                    lobbyKeys = Object.keys(lobby);
+                    console.log(`${lobbyKeys.length} players`);
+
+                    if (lobbyKeys.length >= lobbySize) {
+                        console.log("Started game");
+
+                        lobby.creeps = [];
+                        lobby.buildings = [];
+
+                        for (i = 0; i < lobbyKeys.length; i++) {
+                            const ws_temp = lobby[lobbyKeys[i]];
+                            let response = initializePlayer(i);
+                            response = JSON.parse(response);
+                            console.log(account);
+                            response.highscore = account.statistics.highscore;
+                            response = JSON.stringify(response);
+                            ws_temp.send(response);
+                        }
+
+                        lobbyNum += 1;
+                    }
                 }
-            }
 
-            lobbyKeys = Object.keys(lobby);
-            console.log(`${lobbyKeys.length} players`);
+                wss.on("close", function close() {
+                    console.log(`User ${userId} left`);
+                    delete lobby[userId];
+                });
 
-            if (lobbyKeys.length >= lobbySize) {
-                console.log("Started game");
+                ws.on("message", function incoming(message)
+                {
+                    // console.log(message);
+                    const response = updateObjects(message, lobby);
 
-                lobby.creeps = [];
-                lobby.buildings = [];
+                    let lobbyKeys = Object.keys(lobby);
 
-                for (i = 0; i < lobbyKeys.length; i++) {
-                    const ws_temp = lobby[lobbyKeys[i]];
-                    const response = initializePlayer(i);
-                    ws_temp.send(response);
-                }
+                    for (let i = 0; i < lobbyKeys.length; i++) {
+                        const ws_temp = lobby[lobbyKeys[i]];
+                        if (ws_temp.readyState === 1) {
+                            ws.send(response);
+                        }
+                    }
+                });
 
-                lobbyNum += 1;
-            }
-        }
-
-        wss.on("close", function close() {
-            console.log(`User ${userId} left`);
-            delete lobby[userId];
+            });
         });
-
-        ws.on("message", function incoming(message)
-        {
-            // console.log(message);
-            const response = updateObjects(message, lobby);
-
-            let lobbyKeys = Object.keys(lobby);
-
-            for (let i = 0; i < lobbyKeys.length; i++) {
-                const ws_temp = lobby[lobbyKeys[i]];
-                if (ws_temp.readyState === 1) {
-                    ws.send(response);
-                }
-            }
-        });
-
-        // db.collection("accounts", {}, function(err, col) {
-        //     col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
-        //     });
-        // });
-
     });
 
     function initializePlayer(currConnections)
