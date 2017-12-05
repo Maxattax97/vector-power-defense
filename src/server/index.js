@@ -11,6 +11,9 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
+//init Express Router
+//var router = express.Router();
+
 const app = express();
 const cookieSecret = require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret;
 const credentials = {
@@ -146,6 +149,17 @@ function updateObjects(message)
     {
         buildings.push(building);
     }
+    for (building in changes.changedBuilding)
+    {
+        for (i = 0; i < buildings.length; i++)
+        {
+            if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+            {
+                buildings[i] = building;
+                break;
+            }
+        }
+    }
     for (building in changes.removedBuilding)
     {
         for (i = 0; i < buildings.length; i++)
@@ -161,6 +175,17 @@ function updateObjects(message)
     {
         creeps.push(creep);
     }
+    for (creep in changes.changedCreeps)
+    {
+        for (i = 0; i < creeps.length; i++)
+        {
+            if (creeps[i].creepID === creep.creepID)
+            {
+                creeps[i] = creep;
+                break;
+            }
+        }
+    }
     for (creep in changes.removedCreeps)
     {
         for (i = 0; i < creeps.length; i++)
@@ -175,8 +200,8 @@ function updateObjects(message)
     var objects;
     objects.playerInfo = false;
     objects.play = true;
-    objects.Creeps = creeps;
-    objects.Buildings = buildings;
+    objects.creeps = creeps;
+    objects.buildings = buildings;
     return JSON.stringify(objects);
 }
 

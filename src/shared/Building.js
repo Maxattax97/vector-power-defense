@@ -10,10 +10,10 @@ class Building
     Integer upgradeCost     :: Cost for next buildingLevel to be reached.
     Integer totalValue      :: Sum of cost for purchase and all previous upgrades.
     Boolean isCollapsed     :: Indicates building should be rendered as being destroyed
-    World world             :: World instance containing the building
+    Tile[] map              :: Map instance containing the building
     */
 
-    constructor(xpos, ypos, type, cost, world)
+    constructor(xpos, ypos, type, cost, map)
     {
         this.xposition = xpos;
         this.yposition = ypos;
@@ -22,7 +22,12 @@ class Building
         this.totalValue = cost;
         this.buildingLevel = 0;
         this.isCollapsed = false;
-        this.world = world;
+        this.map = map;
+    }
+
+    get string()
+    {
+        return ("Type: " + this.buildingType + " X: " + this.xposition + " Y: " + this.yposition); 
     }
 
     upgrade(resources)

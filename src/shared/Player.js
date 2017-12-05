@@ -2,6 +2,7 @@
 const DefenseTower = require("./Building/DefensiveTower");
 const OffenseTower = require("./Building/OffensiveTower");
 const PowerNode = require("./Building/PowerNode");
+const CreepID = require("./CreepID");
 
 const BASECOST = 100;
 const AIRCOST = 150;
@@ -14,6 +15,8 @@ const SWARMCOST = 200;
 const ROTUNDCOST = 250;
 const MASSCOST = 300;
 
+const INCOMEDELAY = 10;
+
 class Player
 {
     /*
@@ -21,37 +24,26 @@ class Player
     Building[] buildings    :: List of buildings owned by the player.
     PowerNode powerNode     :: Power node owned by the player.
     Boolean isDefense       :: Whether the player is a defender or not.
-    World world             :: World instance that player is playing with.
-    Integer idCounter       :: Counter for assigning ids for offensive player's creeps
+    Tile[] map              :: Map instance that player is playing with.
+    CreepID idCounter       :: Counter for assigning ids for offensive player's creeps
+    Integer incomeTick
     */
 
-    constructor(xpos, ypos, world, isDefense, numDefenders)
+    constructor(xpos, ypos, map, isDefense, numDefenders)
     {
         this.resources = 0;
         this.buildings = [];
-        this.world = world;
+        this.map = map;
+        this.incomeTick = 0;
         if (isDefense)
         {
-            this.powerNode = new PowerNode(xpos, ypos, this.world, numDefenders);
+            this.powerNode = new PowerNode(xpos, ypos, this.map, numDefenders);
         }
         else
         {
-            this.idCounter = 0;
+            this.idCounter = new CreepID();
         }
         this.isDefense = isDefense;
-    }
-
-    get creepID()
-    {
-        if (this.idCounter === Number.MAX_SAFE_INTEGER)
-        {
-            this.idCounter = 0;
-        }
-        else
-        {
-            this.idCounter++;
-        }
-        return this.idCounter;
     }
 
     purchaseBuilding(xpos, ypos, type)
@@ -81,7 +73,7 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                newBuild = new DefenseTower(xpos, ypos, type, cost, this.world);
+                newBuild = new DefenseTower(xpos, ypos, type, cost, this.map);
                 this.buildings.push(newBuild);
                 return newBuild;
             }
@@ -109,7 +101,7 @@ class Player
             if (this.resources >= cost)
             {
                 this.resources -= cost;
-                newBuild = new OffenseTower(xpos, ypos, type, cost, this.world, this);
+                newBuild = new OffenseTower(xpos, ypos, type, cost, this.map, this.idCounter);
                 this.buildings.push(newBuild);
                 return newBuild;
             }
@@ -193,6 +185,26 @@ class Player
     promoteSpawner(spawner)
     {
         this.resources = spawner.promote(this.resources);
+    }
+
+    receiveIncome()
+    {
+        if (this.incomeTick < INCOMEDELAY)
+        {
+            this.incomeTick++;
+            return;
+        }
+        if (this.isDefense)
+        {
+            this.resources += this.powerNode.income;
+        }
+        else
+        {
+            for (var spawner in this.buildings)
+            {
+                this.resources += spawner.income;
+            }
+        }
     }
 }
 
