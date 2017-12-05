@@ -28,14 +28,17 @@ app.use(bodyParser.urlencoded({
 }));
 // TODO: Implement MongoDB session persistence for production environment.
 app.set("trust proxy", 1);
-app.use(session({
+
+const sessionParser = session({
     cookie: {
         secure: true,
     },
     secret: require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret,
     resave: true,
     saveUninitialized: false,
-}));
+});
+
+app.use(sessionParser);
 
 const port = process.env.PORT || 2701;
 const publicHtmlDir = __dirname + "/../client/";
@@ -53,7 +56,17 @@ redirectApp.get("*", function(req, res) {
 const redirectServer = redirectApp.listen(port - 1);
 
 // Create one more server for handling websockets. Wrapped in Express.
-const wss = new SocketServer({ server: httpsServer });
+const wss = new SocketServer({
+    server: httpsServer,
+    verifyClient: (info, done) => {
+        console.log("Parsing session from request...");
+        sessionParser(info.req, {}, () => {
+            console.log("Session is parsed!");
+            // console.log(info.req.session);
+            done(info.req.session.userId);
+        });
+    },
+});
 
 //////////////////////
 // WEBSOCKET SERVER //
@@ -64,9 +77,10 @@ var creeps = [];
 var buildings = [];
 var numConnections = 0;
 
-wss.on("connection", function connection(ws)
+wss.on("connection", function connection(ws, req)
 {
-    console.log("connection ...");
+    console.log(`connection from user ${req.session.userId}`);
+
     var currConnections = ++numConnections;
     if (numConnections > 5)
     {
@@ -198,6 +212,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     app.post("/auth", function(req, res) {
         console.log("Received a POST request at /auth");
         if (req.session.userId) {
+            console.log(req.session.userId);
             res.redirect("/game");
             return;
         }
