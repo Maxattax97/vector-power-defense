@@ -1,4 +1,3 @@
-const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
@@ -38,8 +37,8 @@ app.use(session({
     saveUninitialized: false,
 }));
 
-const port = process.env.PORT || 27001;
-var publicHtmlDir = __dirname + "/../client/";
+const port = process.env.PORT || 2701;
+const publicHtmlDir = __dirname + "/../client/";
 
 // Make the main app use our port and operate over HTTPS.
 const httpsServer = https.createServer(credentials, app).listen(port);
@@ -54,8 +53,7 @@ redirectApp.get("*", function(req, res) {
 const redirectServer = redirectApp.listen(port - 1);
 
 // Create one more server for handling websockets. Wrapped in Express.
-const expressWsServer = http.createServer(express());
-const wss = new SocketServer({ expressWsServer, port: port + 1 });
+const wss = new SocketServer({ server: httpsServer });
 
 //////////////////////
 // WEBSOCKET SERVER //
