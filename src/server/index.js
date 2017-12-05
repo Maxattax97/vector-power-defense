@@ -144,8 +144,20 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                     delete lobby[userId];
                 });
 
-                ws.on("message", function incoming(message)
-                {
+                ws.on("message", function incoming(message) {
+                    if (message.logout) {
+                        col.updateOne({username: account.username},
+                            {
+                                statistics: {
+                                    highscore: message.highscore
+                                }
+                            }, function(err, result) {
+                                if (err) {
+                                    console.error(err);
+                                }
+                            });
+                        return;
+                    }
                     // console.log(message);
                     const response = updateObjects(message, lobby);
 
