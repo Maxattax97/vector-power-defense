@@ -20,6 +20,7 @@ const BUILDSIZE = 4;
 
 var buildType = "Neutral";
 var newBuildings = [];
+window.newBuildings = newBuildings;
 var changedBuildings = [];
 var removedBuildings = [];
 var newCreeps = [];
@@ -51,7 +52,8 @@ ws.onopen = function() {
 
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
-    // console.log(changes);
+
+    console.log('c', changes);
     if (changes.playerInfo)
     {
         world = new World(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -69,6 +71,7 @@ ws.onmessage = function(message) {
         world.creeps = changes.creeps;
         world.buildings = changes.buildings;
     }
+
     play = true;
 };
 
@@ -221,7 +224,8 @@ const onload = function () {
     function queueUpdates(numTicks) {
         for (var i=0; i < numTicks; i++) {
             lastTick = lastTick + tickLength; //Now lastTick is this tick.
-            update(i, lastTick);
+            // console.log('update');
+            update(numTicks, lastTick);
         }
     }
 
@@ -311,7 +315,10 @@ const onload = function () {
         };
 
         if (ws.readyState === 1) {
-            // console.log(objects);
+            if (newBuildings.length > 0) {
+                console.log('out', newBuildings);
+            }
+
             ws.send(JSON.stringify(objects));
         }
         else {
