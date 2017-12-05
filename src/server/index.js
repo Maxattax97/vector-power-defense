@@ -227,11 +227,11 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (var i = 0; i < changes.newCreeps.length; i++) {
+        for (i = 0; i < changes.newCreeps.length; i++) {
             creep = changes.newCreeps[i];
             lobby.creeps.push(creep);
         }
-        for (var j = 0; j < changes.changedCreeps.length; j++) {
+        for (j = 0; j < changes.changedCreeps.length; j++) {
             creep = changes.changedCreeps[j];
             for (i = 0; i < lobby.creeps.length; i++)
             {
@@ -242,7 +242,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (var j = 0; j < changes.removedCreeps.length; j++) {
+        for (j = 0; j < changes.removedCreeps.length; j++) {
             creep = changes.removedCreeps[j];
             for (i = 0; i < lobby.creeps.length; i++)
             {

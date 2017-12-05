@@ -32,13 +32,15 @@ class World
 
     get string()
     {
+        var i;
+
         var result = "Buildings: ";
-        for (var i = 0; i < this.buildings.length; i++) {
+        for (i = 0; i < this.buildings.length; i++) {
             const building = this.buildings[i];
             result = result + "(" + building.string + ") ";
         }
         result = result + "\r\nCreeps: ";
-        for (var i = 0; i < this.creeps.length; i++) {
+        for (i = 0; i < this.creeps.length; i++) {
             const creep = this.creeps[i];
             result = result + "(" + creep.string + ") ";
         }
