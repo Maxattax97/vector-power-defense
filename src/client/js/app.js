@@ -232,7 +232,7 @@ function promoteListener(e)
             player.receiveIncome();
             tick--;
         }
-        var objects;
+        var objects = {};
         objects.newBuildings = newBuildings;
         objects.changedBuildings = changedBuildings;
         objects.removedBuildings = removedBuildings;

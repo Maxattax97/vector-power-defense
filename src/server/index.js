@@ -141,7 +141,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         var playerInfo = {};
         playerInfo.isDefense = true;
         playerInfo.playerInfo = true;
-        playerInfo.play = false;
+        playerInfo.play = true;
+        playerInfo.start = true;
         switch (currConnections)
         {
             case 1:
