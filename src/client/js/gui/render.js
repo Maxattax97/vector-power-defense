@@ -132,9 +132,12 @@ function render(world) {
         positionTower(tower, building.xposition, building.yposition);
     }
 
-    // const items = [].concat.apply([], towers);
-    // shootBetween(basicTowers[0], basicTowers[1]);
-    // shootSplash(airTowers[0], earthTowers[4], items, 1.5);
+
+    if (world.buildings[0] && world.buildings[1]) {
+        const items = [].concat.apply([], world.buildings);
+        shootBetween(world.buildings[0], world.buildings[1]);
+        shootSplash(world.buildings[0], world.buildings[1], items, 1.5);
+    }
 }
 
 module.exports = {

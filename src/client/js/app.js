@@ -212,7 +212,7 @@ const onload = function () {
         }
 
         queueUpdates(numTicks);
-        // Render.render(world);
+        Render.render(world);
     }
 
     function queueUpdates(numTicks) {
