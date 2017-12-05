@@ -311,7 +311,7 @@ const onload = function () {
             ws.send(JSON.stringify(objects));
         }
         else {
-            console.log('Done');
+            console.log("Done");
         }
 
         newBuildings = [];

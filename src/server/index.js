@@ -138,7 +138,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
 
         ws.on("message", function incoming(message)
         {
-            const response = updateObjects(message);
+            const response = updateObjects(message, lobby);
             ws.send(response);
         });
 
@@ -185,7 +185,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     }
 
     // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
-    function updateObjects(message)
+    function updateObjects(message, lobby)
     {
         var changes = JSON.parse(message);
         var i;
