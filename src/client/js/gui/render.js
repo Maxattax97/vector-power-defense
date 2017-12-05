@@ -2,7 +2,9 @@
 const paper = require("paper");
 const {Point, Path, Color, Group} = paper;
 const settings = {
-    squareSize: 50,
+    canvasSize: 600,
+    shownSquares: 30,
+    squareSize: 600 / 30,
     borderSize: 1,
 };
 
@@ -87,7 +89,30 @@ function shootSplash(a, b, items, splashRange) {
     }
 }
 
+var drawGridLines = function(num_rectangles_wide, num_rectangles_tall, boundingRect) {
+    var width_per_rectangle = boundingRect.width / num_rectangles_wide;
+    var height_per_rectangle = boundingRect.height / num_rectangles_tall;
+    for (var i = 0; i <= num_rectangles_wide; i++) {
+        var xPos = boundingRect.left + i * width_per_rectangle + .5;
+        var topPoint = new paper.Point(xPos, boundingRect.top);
+        var bottomPoint = new paper.Point(xPos, boundingRect.bottom);
+        var aLine = new paper.Path.Line(topPoint, bottomPoint);
+        aLine.strokeColor = '#303030';
+        aLine.sendToBack();
+    }
+    for (var i = 0; i <= num_rectangles_tall; i++) {
+        var yPos = boundingRect.top + i * height_per_rectangle + .5;
+        var leftPoint = new paper.Point(boundingRect.left, yPos);
+        var rightPoint = new paper.Point(boundingRect.right, yPos);
+        var aLine = new paper.Path.Line(leftPoint, rightPoint);
+        aLine.strokeColor = '#303030';
+        aLine.sendToBack();
+    }
+}
+
 function init() {
+    drawGridLines(settings.shownSquares, settings.shownSquares, paper.view.bounds);
+
     var rect = new Path.Rectangle({
         point: [0, 0],
         size: [paper.view.size.width, paper.view.size.height],
@@ -128,9 +153,17 @@ function render(world) {
                 color = colors[4];
                 break;
         }
-        const tower = createTower(building.buildingLevel, color);
-        positionTower(tower, building.xposition, building.yposition);
+
+        // const tower = createTower(building.buildingLevel, color);
+        // positionTower(tower, building.xposition, building.yposition);
     }
+
+    if (!world.mystart) {
+        console.log('Still?');
+        const tower = createTower(2, '#eeeeee');
+        positionTower(tower, 10, 10);
+    }
+    world.mystart = true;
 
     // const items = [].concat.apply([], towers);
     // shootBetween(basicTowers[0], basicTowers[1]);

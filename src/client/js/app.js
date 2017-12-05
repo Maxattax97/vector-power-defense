@@ -12,8 +12,8 @@ var lastTick = performance.now();
 var tickLength = 50;
 
 
-const WIDTH = 500;
-const HEIGHT = 300;
+const WIDTH = 600;
+const HEIGHT = 600;
 
 const BUILDSIZE = 4;
 
@@ -212,7 +212,7 @@ const onload = function () {
         }
 
         queueUpdates(numTicks);
-        // Render.render(world);
+        Render.render(world);
     }
 
     function queueUpdates(numTicks) {

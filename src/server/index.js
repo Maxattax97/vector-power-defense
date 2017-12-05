@@ -140,6 +140,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         ws.on("message", function incoming(message)
         {
             const response = updateObjects(message, lobby);
+            console.log(`User ${userId} sent`, message);
 
             let lobbyKeys = Object.keys(lobby);
 
