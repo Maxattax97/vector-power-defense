@@ -8,13 +8,16 @@ const MongoClient = require("mongodb").MongoClient;
 const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
 const app = express();
+const cookieSecret = require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret;
 const credentials = {
     key: fs.readFileSync(__dirname + "/security/privateKey.pem").toString(),
     cert: fs.readFileSync(__dirname + "/security/certificate.pem").toString(),
 };
+
 
 app.use(express.static("public"));
 app.use(helmet()); // Security enhancements.
@@ -24,14 +27,18 @@ app.use(bodyParser.urlencoded({
 }));
 // TODO: Implement MongoDB session persistence for production environment.
 app.set("trust proxy", 1);
+app.use(cookieParser(cookieSecret));
 app.use(session({
     cookie: {
         secure: true,
     },
-    secret: require(path.resolve(__dirname + " /../../secrets.json")).cookieSecret,
+    secret: cookieSecret,
     resave: true,
     saveUninitialized: false,
 }));
+
+// HACK: We have to wait for a single request to fetch the store.
+var sessionStore = null;
 
 const port = process.env.PORT || 2701;
 const publicHtmlDir = __dirname + "/../client/";
@@ -62,28 +69,36 @@ var numConnections = 0;
 
 wss.on("connection", function connection(ws)
 {
-    console.log("connection ...");
-    var currConnections = ++numConnections;
-    if (numConnections > 5)
-    {
-        ws.deny = true;
-    }
+    console.log("Websocket connection established ...");
 
-    ws.on("message", function incoming(message)
-    {
-        var response;
-        if (message === "Assign Player")
+    getAccountFromCookie(ws).then(function(sess) {
+        console.log(sess);
+        //var account = sess;
+
+        var currConnections = ++numConnections;
+        if (numConnections > 5)
         {
-            response = initializePlayer(currConnections);
+            ws.deny = true;
         }
-        else
+
+        ws.on("message", function incoming(message)
         {
-            response = updateObjects(message);
-        }
-        ws.send(response);
+            var response;
+            if (message === "Assign Player")
+            {
+                response = initializePlayer(currConnections);
+            }
+            else
+            {
+                response = updateObjects(message);
+            }
+            ws.send(response);
+        });
+
+        //ws.send("message from server at: " + new Date());
+    }).catch(function(err) {
+        console.error(err);
     });
-
-    //ws.send("message from server at: " + new Date());
 });
 
 function initializePlayer(currConnections)
@@ -165,13 +180,33 @@ function updateObjects(message)
     return JSON.stringify(objects);
 }
 
-/////////////////
-// HTTP SERVER //
-/////////////////
+function getAccountFromCookie(ws) {
+    return new Promise(function(resolve, reject) {
+        cookieParser(ws.upgradeReq, null, function(err) {
+            if (err) {
+                reject(err);
+            } else {
+                var sessionId = ws.upgradeReq.signedCookies["connect.sid"];
+                sessionStore.get(sessionId, function(err, sess) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(sess);
+                    }
+                });
+            }
+        });
+    });
+}
+
+//////////////////////////
+// HTTPS EXPRESS SERVER //
+//////////////////////////
 
 MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     app.post("/auth", function(req, res) {
-        console.log("Received a POST request at /auth");
+        trySaveSessionStore(req.sessionStore);
+
         if (req.session.userId) {
             res.redirect("/game");
             return;
@@ -229,17 +264,22 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     });
 
     app.post("/logout", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         delete req.session.userId;
         res.redirect("/?msg=Logged+Out&color=green");
     });
 
     app.get("/logout", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         delete req.session.userId;
         res.redirect("/?msg=Logged+Out&color=green");
     });
 
     app.post("/newaccount", function(req, res) {
-        console.log("Receive a POST request at /newaccount");
+        trySaveSessionStore(req.sessionStore);
+
         if (req.body && req.body.email && req.body.username && req.body.password) {
             // Check that username and email are not yet in use.
 
@@ -287,6 +327,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     });
 
     app.get("/game", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         if (req.session.userId) {
             res.sendFile(path.resolve(publicHtmlDir + "game.html"));
         } else {
@@ -295,10 +337,14 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     });
 
     app.get("/register", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         res.sendFile(path.resolve(publicHtmlDir + "register.html"));
     });
 
     app.get("/", function(req, res) {
+        trySaveSessionStore(req.sessionStore);
+
         if (req.session.userId) {
             res.redirect("/game");
         } else {
@@ -320,6 +366,14 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
             wss.close();
             console.log("Shutdown process complete");
             shutdownMutex = 2;
+        }
+    }
+
+    function trySaveSessionStore(store) {
+        if (!sessionStore) {
+            sessionStore = store;
+            console.log("Fetched and saved reference to session store");
+            console.log(sessionStore);
         }
     }
 
