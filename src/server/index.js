@@ -191,14 +191,14 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                         col.findOne({username: req.body.username}, {}).then(function(doc) {
                             if (! doc) {
                                 delete req.session.userId;
-                                res.redirect("/?msg=User+Does+Not+Exist&color=red");
+                                res.redirect("/login.html?msg=User+Does+Not+Exist&color=red");
                             } else {
                                 var saltBuf = Buffer.from(doc.salt, "hex");
                                 crypto.pbkdf2(req.body.password, saltBuf, doc.iterations, 256, "sha256", function(err, passHash) {
                                     if (err) {
                                         console.error(err);
                                         delete req.session.userId;
-                                        res.redirect("/?msg=Internal+Error&color=red");
+                                        res.redirect("/login.html?msg=Internal+Error&color=red");
                                     } else if (passHash.toString("hex") === doc.hash) {
                                         console.log(req.body.username + " [ ID", doc._id, "] succesfully authenticated");
                                         req.session.userId = doc._id;
@@ -210,32 +210,32 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                                         }
                                         req.session.loginAttempts++;
                                         console.log("Failed login attempt (" + req.session.loginAttempts + ")");
-                                        res.redirect("/?msg=Incorrect+Password&color=red");
+                                        res.redirect("/login.html?msg=Incorrect+Password&color=red");
                                     }
                                 });
                             }
                         }).catch(function(err) {
                             console.error(err);
                             delete req.session.userId;
-                            res.redirect("/?msg=Internal+Error&color=red");
+                            res.redirect("/login.html?msg=Internal+Error&color=red");
                         });
                     }
                 });
             }
         } else {
             delete req.session.userId;
-            res.redirect("/?msg=Login+Failed&color=red");
+            res.redirect("/login.html?msg=Login+Failed&color=red");
         }
     });
 
     app.post("/logout", function(req, res) {
         delete req.session.userId;
-        res.redirect("/?msg=Logged+Out&color=green");
+        res.redirect("/login.html?msg=Logged+Out&color=green");
     });
 
     app.get("/logout", function(req, res) {
         delete req.session.userId;
-        res.redirect("/?msg=Logged+Out&color=green");
+        res.redirect("/login.html?msg=Logged+Out&color=green");
     });
 
     app.post("/newaccount", function(req, res) {
@@ -290,7 +290,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         if (req.session.userId) {
             res.sendFile(path.resolve(publicHtmlDir + "game.html"));
         } else {
-            res.redirect("/");
+            res.redirect("/login.html");
         }
     });
 
