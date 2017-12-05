@@ -58,8 +58,6 @@ ws.onmessage = function(message) {
     {
         const elem = document.getElementById("highscore");
         elem.innerText = `highscore: ${changes.highscore}`;
-        console.log(elem);
-        console.log('test', changes.highscore);
 
         world = new World(CANVAS_WIDTH, CANVAS_HEIGHT);
         const xpos = Math.round(changes.xpos * CANVAS_WIDTH);
