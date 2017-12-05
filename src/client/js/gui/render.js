@@ -87,7 +87,7 @@ function shootSplash(a, b, items, splashRange) {
     }
 }
 
-function render(world) {
+function init() {
     var rect = new Path.Rectangle({
         point: [0, 0],
         size: [paper.view.size.width, paper.view.size.height],
@@ -96,21 +96,9 @@ function render(world) {
         selected: true,
     });
     rect.sendToBack();
+}
 
-    const basicTowers = [];
-    const airTowers = [];
-    const waterTowers = [];
-    const earthTowers = [];
-    const fireTowers = [];
-
-    const towers = [
-        basicTowers,
-        airTowers,
-        waterTowers,
-        earthTowers,
-        fireTowers,
-    ];
-
+function render(world) {
     const colors = [
         "#eeeeee",
         "#8ffcff",
@@ -122,7 +110,7 @@ function render(world) {
     for (var building in world.buildings)
     {
         var color;
-        switch (world.buildings.buildingType)
+        switch (building.buildingType)
         {
             case "BasicTower":
                 color = colors[0];
@@ -143,21 +131,13 @@ function render(world) {
         const tower = createTower(building.buildingLevel, color);
         positionTower(tower, building.xposition, building.yposition);
     }
-    /*
-    for (let type = 0; type < colors.length; type++) {
-        const moreTowers = towers[type];
-        const color = colors[type];
-        for (let level = 0; level <= 4; level++) {
-            const tower = createTower(level, color);
-            positionTower(tower, level, type);
-            moreTowers.push(tower);
-        }
-    }
-    */
 
-    const items = [].concat.apply([], towers);
-    shootBetween(basicTowers[0], basicTowers[1]);
-    shootSplash(airTowers[0], earthTowers[4], items, 1.5);
+    // const items = [].concat.apply([], towers);
+    // shootBetween(basicTowers[0], basicTowers[1]);
+    // shootSplash(airTowers[0], earthTowers[4], items, 1.5);
 }
 
-module.exports = render;
+module.exports = {
+    render,
+    init,
+};

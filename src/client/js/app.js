@@ -3,7 +3,7 @@ const paper = require("paper");
 const Player = require("../../shared/Player");
 const World = require("../../shared/World");
 const Util = require("util");
-//const Render = require("./gui/render");
+const Render = require("./gui/render");
 
 var world = new World(0, 0);
 var player = new Player(0, 0, null, 0, 0);
@@ -46,11 +46,6 @@ const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
     console.log("Connection established");
-};
-
-window.onload = function() {
-    const canvas = document.getElementById("canvas");
-    paper.setup(canvas);
 };
 
 window.addEventListener("keypress", function(e){
@@ -177,7 +172,7 @@ function promote(e)
     }
 }
 
-(function () {
+const onload = function () {
     function main(tFrame) {
         window.requestAnimationFrame(main);
         if (play === false)
@@ -197,7 +192,7 @@ function promote(e)
         }
 
         queueUpdates(numTicks);
-        //Render.render(world);
+        // Render.render(world);
     }
 
     function queueUpdates(numTicks) {
@@ -220,7 +215,7 @@ function promote(e)
     }
 
     function removeWorld(list) {
-        const list2 = []
+        const list2 = [];
         for (var i = 0; i < list.length; i++) {
             list2[i] = Object.assign({}, list[i]);
             delete list2[i].map;
@@ -306,7 +301,8 @@ function promote(e)
     tickLength = 500; //This sets your simulation to run at 20Hz (50ms)
 
     setInitialState();
-    main(performance.now()); // Start the cycle
+
+    Render.init();
 
     ws.onmessage = function(message) {
         var changes = JSON.parse(message.data);
@@ -337,4 +333,11 @@ function promote(e)
         }
     };
 
-})();
+};
+
+window.onload = function() {
+    const canvas = document.getElementById("canvas");
+    paper.setup(canvas);
+
+    onload();
+};
