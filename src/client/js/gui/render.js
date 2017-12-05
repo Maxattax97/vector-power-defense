@@ -136,7 +136,7 @@ function render(world) {
     ];
 
     for (var i = 0; i < world.buildings.length; i++) {
-        const building = world.buildings[i]
+        const building = world.buildings[i];
 
         var color = "#ffffff";
         switch (building.buildingType)
@@ -161,7 +161,7 @@ function render(world) {
         const id = building.id;
 
         if (!rendering[id]) {
-            console.log('render building', building);
+            console.log("render building", building);
             const tower = createTower(building.buildingLevel, color);
             const xpos = Math.round(building.xposition/16);
             const ypos = Math.round(building.yposition/16);

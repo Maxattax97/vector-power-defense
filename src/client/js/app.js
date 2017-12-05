@@ -53,7 +53,7 @@ ws.onopen = function() {
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
 
-    console.log('c', changes);
+    console.log("c", changes);
     if (changes.playerInfo)
     {
         world = new World(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -257,6 +257,13 @@ const onload = function () {
             return;
         }
 
+        if (newBuildings.length > 0) {
+            console.log("newBuildings", newBuildings);
+        }
+        if (changedBuildings.length > 0) {
+            console.log("changedBuildings", changedBuildings);
+        }
+
         addWorld(newBuildings);
         addWorld(changedBuildings);
         addWorld(removedBuildings);
@@ -316,7 +323,7 @@ const onload = function () {
 
         if (ws.readyState === 1) {
             if (newBuildings.length > 0) {
-                console.log('out', newBuildings);
+                console.log("out", newBuildings);
             }
 
             ws.send(JSON.stringify(objects));

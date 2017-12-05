@@ -200,8 +200,8 @@ class Player
         }
         else
         {
-            for (var spawner in this.buildings)
-            {
+            for (var i = 0; i < this.buildings.length; i++) {
+                const spawner = this.buildings[i];
                 this.resources += spawner.income;
             }
         }

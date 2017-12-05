@@ -200,12 +200,13 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         var i;
         var creep;
         var building;
-        for (building in changes.newBuildings)
-        {
+        for (var i = 0; i < changes.newBuildings.length; i++) {
+            building = changes.newBuildings[i];
             lobby.buildings.push(building);
         }
-        for (building in changes.changedBuilding)
-        {
+        for (var i = 0; i < changes.changedBuildings.length; i++) {
+            building = changes.changedBuildings[i];
+            console.log("found", building);
             for (i = 0; i < lobby.buildings.length; i++)
             {
                 if (lobby.buildings[i].xposition === building.xposition && lobby.buildings[i].yposition === building.yposition)
@@ -215,8 +216,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (building in changes.removedBuilding)
-        {
+        for (var i = 0; i < changes.removedBuildings.length; i++) {
+            building = changes.removedBuildings[i];
             for (i = 0; i < lobby.buildings.length; i++)
             {
                 if (lobby.buildings[i].xposition === building.xposition && lobby.buildings[i].yposition === building.yposition)
@@ -226,12 +227,12 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (creep in changes.newCreeps)
-        {
+        for (var i = 0; i < changes.newCreeps.length; i++) {
+            creep = changes.newCreeps[i];
             lobby.creeps.push(creep);
         }
-        for (creep in changes.changedCreeps)
-        {
+        for (var i = 0; i < changes.changedCreeps.length; i++) {
+            creep = changes.changedCreeps[i];
             for (i = 0; i < lobby.creeps.length; i++)
             {
                 if (lobby.creeps[i].creepID === creep.creepID)
@@ -241,8 +242,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                 }
             }
         }
-        for (creep in changes.removedCreeps)
-        {
+        for (var i = 0; i < changes.removedCreeps.length; i++) {
+            creep = changes.removedCreeps[i];
             for (i = 0; i < lobby.creeps.length; i++)
             {
                 if (lobby.creeps[i].creepID === creep.creepID)

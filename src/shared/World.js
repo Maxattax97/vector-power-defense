@@ -33,13 +33,13 @@ class World
     get string()
     {
         var result = "Buildings: ";
-        for (var building in this.buildings)
-        {
+        for (var i = 0; i < this.buildings.length; i++) {
+            const building = this.buildings[i];
             result = result + "(" + building.string + ") ";
         }
         result = result + "\r\nCreeps: ";
-        for (var creep in this.creeps)
-        {
+        for (var i = 0; i < this.creeps.length; i++) {
+            const creep = this.creeps[i];
             result = result + "(" + creep.string + ") ";
         }
         result = result + "\r\n";
@@ -165,8 +165,8 @@ class World
         // Tiles currently visited
         var visited = [];
         var tileQueue = [];
-        for (var source in this.nodes)
-        {
+        for (var i = 0; i < this.nodes.length; i++) {
+            const source = this.nodes[i];
             var x = source.xposition;
             var y = source.yposition;
             tileQueue.push(this.map[x][y]);
