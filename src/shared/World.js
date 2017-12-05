@@ -171,39 +171,39 @@ class World
             var y = source.yposition;
             tileQueue.push(this.map[x][y]);
             visited[x][y] = true;
-            while (tileQueue.length !== 0)
+        }
+        while (tileQueue.length !== 0)
+        {
+            var node = tileQueue.shift();
+            x = node.xposition;
+            y = node.yposition;
+            if (x < this.xsize && visited[x+1][y] === false && this.map[x+1][y].isWalkable === true)
             {
-                var node = tileQueue.shift();
-                x = node.xposition;
-                y = node.yposition;
-                if (x < this.xsize && visited[x+1][y] === false && this.map[x+1][y].isWalkable === true)
-                {
-                    this.map[x+1][y].nextTileX = x;
-                    this.map[x+1][y].nextTileY = y;
-                    tileQueue.push(this.map[x+1][y]);
-                    visited[x+1][y] = true;
-                }
-                if (x > 0 && visited[x-1][y] === false && this.map[x-1][y].isWalkable === true)
-                {
-                    this.map[x-1][y].nextTileX = x;
-                    this.map[x-1][y].nextTileY = y;
-                    tileQueue.push(this.map[x-1][y]);
-                    visited[x-1][y] = true;
-                }
-                if (y < this.ysize && visited[x][y+1] === false && this.map[x][y+1].isWalkable === true)
-                {
-                    this.map[x][y+1].nextTileX = x;
-                    this.map[x][y+1].nextTileY = y;
-                    tileQueue.push(this.map[x][y+1]);
-                    visited[x][y+1] = true;
-                }
-                if (y > 0 && visited[x][y-1] === false && this.map[x][y-1].isWalkable === true)
-                {
-                    this.map[x][y-1].nextTileX = x;
-                    this.map[x][y-1].nextTileY = y;
-                    tileQueue.push(this.map[x][y-1]);
-                    visited[x][y-1] = true;
-                }
+                this.map[x+1][y].nextTileX = x;
+                this.map[x+1][y].nextTileY = y;
+                tileQueue.push(this.map[x+1][y]);
+                visited[x+1][y] = true;
+            }
+            if (x > 0 && visited[x-1][y] === false && this.map[x-1][y].isWalkable === true)
+            {
+                this.map[x-1][y].nextTileX = x;
+                this.map[x-1][y].nextTileY = y;
+                tileQueue.push(this.map[x-1][y]);
+                visited[x-1][y] = true;
+            }
+            if (y < this.ysize && visited[x][y+1] === false && this.map[x][y+1].isWalkable === true)
+            {
+                this.map[x][y+1].nextTileX = x;
+                this.map[x][y+1].nextTileY = y;
+                tileQueue.push(this.map[x][y+1]);
+                visited[x][y+1] = true;
+            }
+            if (y > 0 && visited[x][y-1] === false && this.map[x][y-1].isWalkable === true)
+            {
+                this.map[x][y-1].nextTileX = x;
+                this.map[x][y-1].nextTileY = y;
+                tileQueue.push(this.map[x][y-1]);
+                visited[x][y-1] = true;
             }
         }
     }

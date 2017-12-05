@@ -2,7 +2,7 @@
 const paper = require("paper");
 const Player = require("../../shared/Player");
 const World = require("../../shared/World");
-const Util = require("util");
+//const Util = require("util");
 const Render = require("./gui/render");
 
 var world = new World(0, 0);
@@ -45,21 +45,15 @@ const offenseTypes = [
 const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
-    console.log('Connected');
+
 };
 
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
-
     console.log(message.data);
-
     if (changes.playerInfo === true)
     {
         world = new World(WIDTH, HEIGHT);
-        for (var x = 0; x < WIDTH; x++)
-        {
-            buildMap[x] = [];
-        }
         player = new Player(Math.round(changes.xpos * WIDTH), Math.round(changes.ypos * HEIGHT), world, changes.isDefense, 4);
         if (changes.isDefense)
         {
@@ -144,11 +138,9 @@ window.addEventListener("click", function(e){
                 type = offenseTypes[buildType - 1];
             }
             var building = player.purchaseBuilding(e.clientX, e.clientY, type);
-            console.log(player.resources);
             if ((building))
             {
                 world.addBuilding(building);
-                console.log(building.string);
                 newBuildings.push(building);
                 for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
                 {
@@ -265,17 +257,13 @@ const onload = function () {
         addWorld(changedCreeps);
         addWorld(removedCreeps);
 
-        var creep;
-        var tower;
-        var spawner;
-        var target;
+        var target = null;
         if (player.isDefense)
         {
-            for (tower in player.buildings)
+            for (let i = 0; i < player.buildings.length; i++)
             {
-                console.log(tower.buildingType);
-                target = tower.attack(world.creeps);
-                if (target !== null)
+                target = player.buildings[i].attack(world.creeps);
+                if ((target))
                 {
                     if (target.currHealth <= 0)
                     {
@@ -291,17 +279,19 @@ const onload = function () {
         }
         else
         {
-            for (creep in world.creeps)
+            for (let i = 0; i < world.creeps.length; i++)
             {
-                creep.move();
-                changedCreeps.push(creep);
+                world.creeps[i].move();
+                changedCreeps.push(world.creeps[i]);
             }
-            for (spawner in player.buildings)
+            for (let i = 0; i < player.buildings.length; i++)
             {
-                for (creep in spawner.spawn)
+                var spawnList = player.buildings[i].spawn;
+                for (let j = 0; j < spawnList.length; j++)
                 {
-                    newCreeps.push(creep);
-                    world.addCreep(creep);
+                    newCreeps.push(spawnList[j]);
+                    console.log(spawnList[j].string);
+                    world.addCreep(spawnList[j]);
                 }
             }
         }
@@ -330,6 +320,10 @@ const onload = function () {
         newCreeps = [];
         changedCreeps = [];
         removedCreeps = [];
+    }
+    for (var x = 0; x < WIDTH; x++)
+    {
+        buildMap[x] = [];
     }
 
     lastTick = performance.now();
