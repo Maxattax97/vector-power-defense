@@ -23,6 +23,7 @@ class World
         this.xsize = xsize;
         this.ysize = ysize;
         for (var x = 0; x < xsize; x++) {
+            this.map[x] = [];
             for (var y = 0; y < ysize; y++) {
                 this.map[x][y] = new Tile(x, y, "#444444", true, true);
             }
