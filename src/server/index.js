@@ -78,38 +78,62 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     // Lists of all game objects
     var creeps = [];
     var buildings = [];
-    var numConnections = 0;
+    var lobbies = [];
+    var lobbyNum = 0;
+    const lobbySize = 2;
 
     wss.on("connection", function connection(ws, req)
     {
-        console.log(`connection from user ${req.session.userId}`);
+        const userId = `${req.session.userId}:${Date.now()}`;
+        console.log(`User ${userId} connected`);
 
-        db.collection("accounts", {}, function(err, col) {
-            col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
-                console.log(account);
+        lobbies[lobbyNum] = lobbies[lobbyNum] || {};
+        const lobby = lobbies[lobbyNum];
+        lobby[userId] = ws;
 
-                var currConnections = ++numConnections;
-                if (numConnections > 5)
-                {
-                    ws.deny = true;
+        let lobbyKeys = Object.keys(lobby);
+        var i;
+
+        if (lobbyKeys.length >= lobbySize) {
+            for (i = 0; i < lobbyKeys.length; i++) {
+                const ws_temp = lobby[lobbyKeys[i]];
+                if (ws_temp.readyState !== 1) {
+                    delete lobby[lobbyKeys[i]];
+                }
+            }
+
+            lobbyKeys = Object.keys(lobby);
+            console.log(`${lobbyKeys.length} players`);
+
+            if (lobbyKeys.length >= lobbySize) {
+                console.log('Started game');
+
+                for (i = 0; i < lobbyKeys.length; i++) {
+                    const ws_temp = lobby[lobbyKeys[i]];
+                    const response = initializePlayer(i);
+                    ws_temp.send(response);
                 }
 
-                ws.on("message", function incoming(message)
-                {
-                    var response;
-                    if (message === "Assign Player")
-                    {
-                        response = initializePlayer(currConnections);
-                    }
-                    else
-                    {
-                        response = updateObjects(message);
-                    }
-                    ws.send(response);
-                });
-                //ws.send("message from server at: " + new Date());
-            });
+                lobbyNum += 1;
+            }
+        }
+
+        wss.on("close", function close() {
+            console.log(`User ${userId} left`);
+            delete lobby[userId];
         });
+
+        ws.on("message", function incoming(message)
+        {
+            const response = updateObjects(message);
+            ws.send(response);
+        });
+
+        // db.collection("accounts", {}, function(err, col) {
+        //     col.findOne({_id: new ObjectID(req.session.userId)}, {}).then(function(account) {
+        //     });
+        // });
+
     });
 
     function initializePlayer(currConnections)

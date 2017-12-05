@@ -42,11 +42,14 @@ const offenseTypes = [
 const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
-    ws.send("Assign Player");
+    console.log("Connection established");
 };
 
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
+
+    console.log("Changes: ", changes);
+
     if (changes.playerInfo === true)
     {
         world = new World(WIDTH, HEIGHT);
