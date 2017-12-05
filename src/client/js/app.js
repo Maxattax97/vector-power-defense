@@ -330,7 +330,7 @@ window.onload = function() {
         {
             if (buildType > 0) {
                 const xClick = Math.floor(e.clientX / 40);
-                const yClick = Math.floor(e.clientX / 40);
+                const yClick = Math.floor(e.clientY / 40);
                 console.log(xClick, yClick);
 
                 if (world.isValidSpot(xClick, yClick, player.xposition, player.yposition))
@@ -357,6 +357,9 @@ window.onload = function() {
                             }
                         }
                     }
+                }
+                else {
+                    console.log('failed');
                 }
 
             }

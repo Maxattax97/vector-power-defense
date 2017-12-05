@@ -77,6 +77,9 @@ class Player
                 this.buildings.push(newBuild);
                 return newBuild;
             }
+            else {
+                console.log("NOT ENOUGH MONEY");
+            }
         }
         else if (type.indexOf("Spawn") !== -1)
         {
@@ -104,6 +107,9 @@ class Player
                 newBuild = new OffenseTower(xpos, ypos, type, cost, this.map, this.idCounter);
                 this.buildings.push(newBuild);
                 return newBuild;
+            }
+            else {
+                console.log("NOT ENOUGH MONEY");
             }
         }
         return null;

@@ -163,8 +163,8 @@ function render(world) {
         if (!rendering[id]) {
             console.log("render building", building);
             const tower = createTower(building.buildingLevel, color);
-            const xpos = Math.round(building.xposition/16);
-            const ypos = Math.round(building.yposition/16);
+            const xpos = building.xposition;
+            const ypos = building.yposition;
             console.log(xpos, ypos);
             positionTower(tower, xpos, ypos);
 

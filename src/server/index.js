@@ -169,24 +169,29 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         {
             case 0:
                 playerInfo.isDefense = false;
-                playerInfo.xpos = 1/2;
-                playerInfo.ypos = 1/2;
+                playerInfo.positionName = "center";
+                playerInfo.xpos = 8;
+                playerInfo.ypos = 8;
                 break;
             case 1:
-                playerInfo.xpos = 1/16;
-                playerInfo.ypos = 1/16;
+                playerInfo.positionName = "top left";
+                playerInfo.xpos = 1;
+                playerInfo.ypos = 1;
                 break;
             case 2:
-                playerInfo.xpos = 15/16;
-                playerInfo.ypos = 1/16;
+                playerInfo.positionName = "top right";
+                playerInfo.xpos = 14;
+                playerInfo.ypos = 1;
                 break;
             case 3:
-                playerInfo.xpos = 1/16;
-                playerInfo.ypos = 15/16;
+                playerInfo.positionName = "bottom left";
+                playerInfo.xpos = 1;
+                playerInfo.ypos = 14;
                 break;
             case 4:
-                playerInfo.xpos = 15/16;
-                playerInfo.ypos = 15/16;
+                playerInfo.positionName = "bottom right";
+                playerInfo.xpos = 14;
+                playerInfo.ypos = 14;
                 playerInfo.play = true;
                 break;
         }

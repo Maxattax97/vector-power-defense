@@ -96,10 +96,8 @@ class World
         //         return false;
         //     }
         // }
-        return ((this.map[buildx] || {})[buildy] || {}).isBuildable;
-    }
-
-    buildable(x, y) {
+        console.log(this.map[buildx]);
+        console.log(this.map[buildx][buildy]);
         return ((this.map[buildx] || {})[buildy] || {}).isBuildable;
     }
 
