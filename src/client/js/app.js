@@ -114,54 +114,6 @@ window.addEventListener("keyup", function(){
     buildType = "Neutral";
 });
 
-window.addEventListener("click", function(e){
-
-    if (buildType === "Sell")
-    {
-        sell(e);
-    }
-    else if (buildType === "Upgrade")
-    {
-        upgrade(e);
-    }
-    else if (buildType === "Promote")
-    {
-        promote(e);
-    }
-    else
-    {
-        if (buildType) {
-
-            console.log(world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition));
-            if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
-            {
-                var type;
-                if (player.isDefense)
-                {
-                    type = defenseTypes[buildType - 1];
-                }
-                else
-                {
-                    type = offenseTypes[buildType - 1];
-                }
-                var building = player.purchaseBuilding(e.clientX, e.clientY, type);
-                if (building)
-                {
-                    world.addBuilding(building);
-                    newBuildings.push(building);
-                    for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
-                    {
-                        for (var y = building.yposition; y < building.yposition + BUILDSIZE; y++)
-                        {
-                            buildMap[x][y] = building;
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-});
 
 function sell(e)
 {
@@ -297,21 +249,21 @@ const onload = function () {
         }
         else
         {
-            for (let i = 0; i < world.creeps.length; i++)
-            {
-                world.creeps[i].move();
-                changedCreeps.push(world.creeps[i]);
-            }
-            for (let i = 0; i < player.buildings.length; i++)
-            {
-                var spawnList = player.buildings[i].spawn;
-                for (let j = 0; j < spawnList.length; j++)
-                {
-                    newCreeps.push(spawnList[j]);
-                    console.log(spawnList[j].string);
-                    world.addCreep(spawnList[j]);
-                }
-            }
+            // for (let i = 0; i < world.creeps.length; i++)
+            // {
+            //     world.creeps[i].move();
+            //     changedCreeps.push(world.creeps[i]);
+            // }
+            // for (let i = 0; i < player.buildings.length; i++)
+            // {
+            //     var spawnList = player.buildings[i].spawn;
+            //     for (let j = 0; j < spawnList.length; j++)
+            //     {
+            //         newCreeps.push(spawnList[j]);
+            //         console.log(spawnList[j].string);
+            //         world.addCreep(spawnList[j]);
+            //     }
+            // }
         }
         player.receiveIncome();
 
@@ -360,6 +312,55 @@ const onload = function () {
 window.onload = function() {
     const canvas = document.getElementById("canvas");
     paper.setup(canvas);
+
+    canvas.addEventListener("click", function(e){
+
+        if (buildType === "Sell")
+        {
+            sell(e);
+        }
+        else if (buildType === "Upgrade")
+        {
+            upgrade(e);
+        }
+        else if (buildType === "Promote")
+        {
+            promote(e);
+        }
+        else
+        {
+            if (buildType > 0) {
+
+                console.log(world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition));
+                if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
+                {
+                    var type;
+                    if (player.isDefense)
+                    {
+                        type = defenseTypes[buildType - 1];
+                    }
+                    else
+                    {
+                        type = offenseTypes[buildType - 1];
+                    }
+                    var building = player.purchaseBuilding(e.clientX, e.clientY, type);
+                    if (building)
+                    {
+                        world.addBuilding(building);
+                        newBuildings.push(building);
+                        for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
+                        {
+                            for (var y = building.yposition; y < building.yposition + BUILDSIZE; y++)
+                            {
+                                buildMap[x][y] = building;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    });
 
     onload();
 };
