@@ -31,7 +31,7 @@ class Player
 
     constructor(xpos, ypos, map, isDefense, numDefenders)
     {
-        this.resources = 0;
+        this.resources = 500;
         this.buildings = [];
         this.map = map;
         this.incomeTick = 0;
@@ -205,6 +205,7 @@ class Player
                 this.resources += spawner.income;
             }
         }
+        this.incomeTick = 0;
     }
 }
 

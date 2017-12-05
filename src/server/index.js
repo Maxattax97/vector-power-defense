@@ -62,16 +62,19 @@ const wss = new SocketServer({ server: httpsServer });
 // Lists of all game objects
 var creeps = [];
 var buildings = [];
+var connections = [];
 var numConnections = 0;
 
 wss.on("connection", function connection(ws)
 {
     console.log("connection ...");
+    console.log(numConnections);
     var currConnections = ++numConnections;
-    if (numConnections > 5)
+    if (currConnections > 5)
     {
         ws.deny = true;
     }
+    connections.push(ws);
 
     ws.on("message", function incoming(message)
     {
@@ -79,6 +82,13 @@ wss.on("connection", function connection(ws)
         if (message === "Assign Player")
         {
             response = initializePlayer(currConnections);
+            /*if (currConnections === 5)
+            {
+                for (var socket in connections)
+                {
+                    socket.send("Start");
+                }
+            }*/
         }
         else
         {
@@ -91,10 +101,10 @@ wss.on("connection", function connection(ws)
 
 function initializePlayer(currConnections)
 {
-    var playerInfo;
+    var playerInfo = {};
     playerInfo.isDefense = true;
     playerInfo.playerInfo = true;
-    playerInfo.play = false;
+    playerInfo.play = true;
     switch (currConnections)
     {
         case 1:
@@ -126,12 +136,13 @@ function initializePlayer(currConnections)
 // Updates all lists. Message is a JSON with lists of new creeps, removed creeps, etc.
 function updateObjects(message)
 {
-    var changes = JSON.parse(message.data);
+    var changes = JSON.parse(message);
     var i;
     var creep;
     var building;
     for (building in changes.newBuildings)
     {
+        console.log(building.string);
         buildings.push(building);
     }
     for (building in changes.changedBuilding)
@@ -182,11 +193,17 @@ function updateObjects(message)
             }
         }
     }
-    var objects;
-    objects.playerInfo = false;
-    objects.play = true;
-    objects.creeps = creeps;
-    objects.buildings = buildings;
+    var objects =
+    {
+        "playerInfo" : false,
+        "play" : true,
+        "creeps" : creeps,
+        "buildings" : buildings,
+    };
+    if (buildings.length !== 0)
+    {
+        console.log(buildings[0].xposition);
+    }
     return JSON.stringify(objects);
 }
 

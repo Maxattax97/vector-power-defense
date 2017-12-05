@@ -1,6 +1,6 @@
 // Script for creep class
 
-const MAXSPEED = 8;
+const SPEEDREQ = 8;
 
 class Creep
 {
@@ -115,11 +115,10 @@ class Creep
     move()
     {
         this.speedTick += this.speed;
-        while (this.speedTick >= MAXSPEED)
+        for (; this.speedTick >= SPEEDREQ; this.speedTick -= this.speed)
         {
-            this.speedTick -= MAXSPEED;
-            this.xposition = this.map[this.xposition][this.yposition].nextTile.xposition;
-            this.yposition = this.map[this.xposition][this.yposition].nextTile.yposition;
+            this.xposition = this.map[this.xposition][this.yposition].nextTileX;
+            this.yposition = this.map[this.xposition][this.yposition].nextTileY;
         }
     }
 

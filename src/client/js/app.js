@@ -2,11 +2,11 @@
 const paper = require("paper");
 const Player = require("../../shared/Player");
 const World = require("../../shared/World");
-const Render = require("./gui/render");
-//const World = require("../../shared/World");
+const Util = require("util");
+//const Render = require("./gui/render");
 
-var world = new World(0,0);
-var player = new Player(0,0, null, false, 0);
+var world = new World(0, 0);
+var player = new Player(0, 0, null, 0, 0);
 var play = false;
 var lastTick = performance.now();
 var tickLength = 50;
@@ -15,6 +15,8 @@ var tickLength = 50;
 const WIDTH = 500;
 const HEIGHT = 300;
 
+const BUILDSIZE = 4;
+
 var buildType = "Neutral";
 var newBuildings = [];
 var changedBuildings = [];
@@ -22,6 +24,7 @@ var removedBuildings = [];
 var newCreeps = [];
 var changedCreeps = [];
 var removedCreeps = [];
+var buildMap = [];
 
 const defenseTypes = [
     "BasicTower",
@@ -46,10 +49,20 @@ ws.onopen = function() {
 };
 
 ws.onmessage = function(message) {
+    /*if (message === "Start")
+    {
+        play = true;
+        return;
+    }*/
     var changes = JSON.parse(message.data);
+    console.log(message.data);
     if (changes.playerInfo === true)
     {
         world = new World(WIDTH, HEIGHT);
+        for (var x = 0; x < WIDTH; x++)
+        {
+            buildMap[x] = [];
+        }
         player = new Player(changes.xpos * WIDTH, changes.ypos * HEIGHT, world, changes.isDefense, 4);
         if (changes.isDefense)
         {
@@ -63,7 +76,7 @@ ws.onmessage = function(message) {
         world.buildings = changes.buildings;
         console.log(world.string);
     }
-    play = changes.play;
+    play = true;
 };
 
 window.onload = function() {
@@ -90,7 +103,10 @@ window.addEventListener("keypress", function(e){
             buildType = 5;
             break;
         case 80:    // P key
-            buildType = "Promote";
+            if (!(player.isDefense))
+            {
+                buildType = "Promote";
+            }
             break;
         case 83:    // S key
             buildType = "Sell";
@@ -98,6 +114,8 @@ window.addEventListener("keypress", function(e){
         case 85:    // U key
             buildType = "Upgrade";
             break;
+        default:
+            buildType = "Neutral";
     }
 });
 
@@ -108,7 +126,18 @@ window.addEventListener("keyup", function(){
 window.addEventListener("click", function(e){
     if (play === false || !(1 <= buildType && buildType <= 5))
     {
-        return;
+        if (buildType === "Sell")
+        {
+            sell(e);
+        }
+        else if (buildType === "Upgrade")
+        {
+            upgrade(e);
+        }
+        else if (buildType === "Promote")
+        {
+            promote(e);
+        }
     }
     else
     {
@@ -124,52 +153,64 @@ window.addEventListener("click", function(e){
                 type = offenseTypes[buildType - 1];
             }
             var building = player.purchaseBuilding(e.clientX, e.clientY, type);
-            world.addBuilding(building);
-            newBuildings.push(building);
-            if (building !== null)
+            console.log(player.resources);
+            if ((building))
             {
-                building.addEventListener("click", sellListener(e));
-                building.addEventListener("click", upgradeListener(e));
-                if (!player.isDefense)
+                world.addBuilding(building);
+                newBuildings.push(building);
+                for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
                 {
-                    building.addEventListener("click", promoteListener(e));
+                    for (var y = building.yposition; y < building.yposition + BUILDSIZE; y++)
+                    {
+                        buildMap[x][y] = building;
+                    }
                 }
             }
         }
     }
 });
 
-function sellListener(e)
+function sell(e)
 {
-    if (buildType === "Sell")
+    var building = buildMap[e.clientX][e.clientY];
+    if ((building))
     {
-        player.sellBuilding(e.currentTarget);
-        world.removeBuilding(e.currentTarget);
-        removedBuildings.push(e.currentTarget);
+        player.sellBuilding(building);
+        world.removeBuilding(building);
+        removedBuildings.push(building);
+        for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
+        {
+            for (var y = building.yposition; y < building.yposition + BUILDSIZE; y++)
+            {
+                buildMap[x][y] = null;
+            }
+        }
     }
 }
 
-function upgradeListener(e)
+function upgrade(e)
 {
-    if (buildType === "Upgrade")
+    var building = buildMap[e.clientX][e.clientY];
+    if ((building))
     {
-        player.upgradeBuilding(e.currentTarget);
-        changedBuildings.push(e.currentTarget);
+        player.upgradeBuilding(building);
+        changedBuildings.push(building);
     }
 }
 
-function promoteListener(e)
+function promote(e)
 {
-    if (buildType === "Promote")
+    var building = buildMap[e.clientX][e.clientY];
+    if ((building))
     {
-        player.promoteSpawner(e.currentTarget);
-        changedBuildings.push(e.currentTarget);
+        player.promoteSpawner(building);
+        changedBuildings.push(building);
     }
 }
 
 (function () {
     function main(tFrame) {
-    //start = window.requestAnimationFrame(main);
+        window.requestAnimationFrame(main);
         if (play === false)
         {
             return;
@@ -187,7 +228,7 @@ function promoteListener(e)
         }
 
         queueUpdates(numTicks);
-        Render.render(world);
+        //Render.render(world);
     }
 
     function queueUpdates(numTicks) {
@@ -208,69 +249,67 @@ function promoteListener(e)
         {
             return;
         }
-        while (tick > 0)
+        var creep;
+        var tower;
+        var spawner;
+        var target;
+        if (player.isDefense)
         {
-            var creep;
-            var tower;
-            var spawner;
-            var target;
-            if (player.isDefense)
+            for (tower in player.buildings)
             {
-                for (tower in player.buildings)
+                target = tower.attack(world.creeps);
+                if (target !== null)
                 {
-                    target = tower.attack(world.creeps);
-                    if (target !== null)
+                    if (target.currHealth <= 0)
                     {
-                        if (target.currHealth <= 0)
-                        {
-                            removedCreeps.push(target);
-                            world.removeCreep(target);
-                        }
-                        else
-                        {
-                            changedCreeps.push(target);
-                        }
+                        removedCreeps.push(target);
+                        world.removeCreep(target);
+                    }
+                    else
+                    {
+                        changedCreeps.push(target);
                     }
                 }
             }
-            else
-            {
-                for (creep in world.creeps)
-                {
-                    creep.move();
-                    changedCreeps.push(creep);
-                }
-                for (spawner in player.buildings)
-                {
-                    for (creep in spawner.spawn)
-                    {
-                        newCreeps.push(creep);
-                        world.addCreep(creep);
-                    }
-                }
-            }
-            player.receiveIncome();
-            tick--;
         }
-        var objects;
-        objects.newBuildings = newBuildings;
-        objects.changedBuildings = changedBuildings;
-        objects.removedBuildings = removedBuildings;
-        objects.newCreeps = newCreeps;
-        objects.changedCreeps = changedCreeps;
-        objects.removedCreeps = removedCreeps;
+        else
+        {
+            for (creep in world.creeps)
+            {
+                creep.move();
+                changedCreeps.push(creep);
+            }
+            for (spawner in player.buildings)
+            {
+                for (creep in spawner.spawn)
+                {
+                    newCreeps.push(creep);
+                    world.addCreep(creep);
+                }
+            }
+        }
+        player.receiveIncome();
+
+        var objects =
+        {
+            "newBuildings" : newBuildings,
+            "changedBuildings" : changedBuildings,
+            "removedBuildings" : removedBuildings,
+            "newCreeps" : newCreeps,
+            "changedCreeps" : changedCreeps,
+            "removedCreeps" : removedCreeps,
+        };
+        ws.send(JSON.stringify(Util.inspect(objects)));
         newBuildings = [];
         changedBuildings = [];
         removedBuildings = [];
         newCreeps = [];
         changedCreeps = [];
         removedCreeps = [];
-        ws.send(JSON.stringify(objects));
-
     }
 
     lastTick = performance.now();
-    tickLength = 50; //This sets your simulation to run at 20Hz (50ms)
+    tickLength = 500; //This sets your simulation to run at 20Hz (50ms)
 
     setInitialState();
     main(performance.now()); // Start the cycle

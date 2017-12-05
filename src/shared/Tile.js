@@ -9,7 +9,8 @@ class Tile
     Integer sideLength      :: Length of each tile.
     Boolean isWalkable      :: Whether tile can be walked on by creep.
     Boolean isBuildable     :: Whether tile can be built on.
-    Tile nextTile           :: Tile that creep pathing will go to next.
+    Integer nextTileX       :: Tile that creep pathing will go to next.
+    Integer nextTileY
     */
 
     constructor(xpos, ypos, color, walkable, buildable)
@@ -20,7 +21,8 @@ class Tile
         this.isWalkable = walkable;
         this.isBuildable = buildable;
         this.sideLength = 1; // Constant value for size of each tile, use same units as creep size
-        this.nextTile = null;
+        this.nextTileX = -1;
+        this.nextTileY = -1;
     }
 }
 
