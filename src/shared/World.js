@@ -3,7 +3,7 @@ const Tile = require("./Tile");
 //const Player = require("./Player");
 
 // Number of tiles that a building takes up on one side
-const BUILDSIZE = 4;
+const BUILDSIZE = 1;
 
 class World
 {
