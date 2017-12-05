@@ -50,7 +50,7 @@ ws.onopen = function() {
 
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
-    console.log(message.data);
+    console.log(changes);
     if (changes.playerInfo === true)
     {
         world = new World(WIDTH, HEIGHT);
@@ -307,7 +307,7 @@ const onload = function () {
             removedCreeps : removeWorld(removedCreeps),
         };
 
-        if (ws.readyState === WebSocket.READY) {
+        if (ws.readyState === 1) {
             ws.send(JSON.stringify(objects));
         }
         else {
