@@ -139,6 +139,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
 
         ws.on("message", function incoming(message)
         {
+            // console.log(message);
             const response = updateObjects(message, lobby);
 
             let lobbyKeys = Object.keys(lobby);
@@ -164,27 +165,26 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         playerInfo.isDefense = true;
         playerInfo.playerInfo = true;
         playerInfo.play = true;
-        playerInfo.start = true;
         switch (currConnections)
         {
-            case 1:
+            case 0:
                 playerInfo.isDefense = false;
                 playerInfo.xpos = 1/2;
                 playerInfo.ypos = 1/2;
                 break;
-            case 2:
+            case 1:
                 playerInfo.xpos = 1/16;
                 playerInfo.ypos = 1/16;
                 break;
-            case 3:
+            case 2:
                 playerInfo.xpos = 15/16;
                 playerInfo.ypos = 1/16;
                 break;
-            case 4:
+            case 3:
                 playerInfo.xpos = 1/16;
                 playerInfo.ypos = 15/16;
                 break;
-            case 5:
+            case 4:
                 playerInfo.xpos = 15/16;
                 playerInfo.ypos = 15/16;
                 playerInfo.play = true;

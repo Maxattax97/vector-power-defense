@@ -11,9 +11,10 @@ var play = false;
 var lastTick = performance.now();
 var tickLength = 50;
 
-
-const WIDTH = 500;
-const HEIGHT = 300;
+//const WIDTH = 16;
+//const HEIGHT = 16;
+const CANVAS_WIDTH = 640;
+const CANVAS_HEIGHT = 640;
 
 const BUILDSIZE = 4;
 
@@ -45,16 +46,18 @@ const offenseTypes = [
 const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
-
+    console.log("Connected");
 };
 
 ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
-    console.log(changes);
-    if (changes.playerInfo === true)
+    // console.log(changes);
+    if (changes.playerInfo)
     {
-        world = new World(WIDTH, HEIGHT);
-        player = new Player(Math.round(changes.xpos * WIDTH), Math.round(changes.ypos * HEIGHT), world, changes.isDefense, 4);
+        world = new World(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const xpos = Math.round(changes.xpos * CANVAS_WIDTH);
+        const ypos = Math.round(changes.ypos * CANVAS_HEIGHT);
+        player = new Player(xpos, ypos, world, changes.isDefense, 4);
         if (changes.isDefense)
         {
             newBuildings.push(player.powerNode);
@@ -109,33 +112,32 @@ window.addEventListener("keyup", function(){
 });
 
 window.addEventListener("click", function(e){
-    if (play === false || !(1 <= buildType && buildType <= 5))
+
+    if (buildType === "Sell")
     {
-        if (buildType === "Sell")
-        {
-            sell(e);
-        }
-        else if (buildType === "Upgrade")
-        {
-            upgrade(e);
-        }
-        else if (buildType === "Promote")
-        {
-            promote(e);
-        }
+        sell(e);
+    }
+    else if (buildType === "Upgrade")
+    {
+        upgrade(e);
+    }
+    else if (buildType === "Promote")
+    {
+        promote(e);
     }
     else
     {
+        console.log(world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition));
         if (world.isValidSpot(e.clientX, e.clientY, player.xposition, player.yposition))
         {
             var type;
             if (player.isDefense)
             {
-                type = defenseTypes[buildType - 1];
+                type = defenseTypes[0]; //buildType - 1];
             }
             else
             {
-                type = offenseTypes[buildType - 1];
+                type = offenseTypes[1]; //buildType - 1];
             }
             var building = player.purchaseBuilding(e.clientX, e.clientY, type);
             if ((building))
@@ -194,9 +196,9 @@ function promote(e)
 
 const onload = function () {
     function main(tFrame) {
-        window.requestAnimationFrame(main);
         if (play === false)
         {
+            window.requestAnimationFrame(main);
             return;
         }
         var nextTick = lastTick + tickLength;
@@ -213,12 +215,13 @@ const onload = function () {
 
         queueUpdates(numTicks);
         Render.render(world);
+        window.requestAnimationFrame(main);
     }
 
     function queueUpdates(numTicks) {
         for (var i=0; i < numTicks; i++) {
             lastTick = lastTick + tickLength; //Now lastTick is this tick.
-            update(lastTick);
+            update(i, lastTick);
         }
     }
 
@@ -308,6 +311,7 @@ const onload = function () {
         };
 
         if (ws.readyState === 1) {
+            // console.log(objects);
             ws.send(JSON.stringify(objects));
         }
         else {
@@ -321,7 +325,7 @@ const onload = function () {
         changedCreeps = [];
         removedCreeps = [];
     }
-    for (var x = 0; x < WIDTH; x++)
+    for (var x = 0; x < CANVAS_WIDTH; x++)
     {
         buildMap[x] = [];
     }
