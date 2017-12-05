@@ -85,8 +85,9 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     //////////////////////
 
     // Lists of all game objects
-    var creeps = [];
-    var buildings = [];
+    // var creeps = [];
+    // var buildings = [];
+    // moved to initialize with Start Game
     var lobbies = [];
     var lobbyNum = 0;
     const lobbySize = 2;
@@ -116,6 +117,9 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
 
             if (lobbyKeys.length >= lobbySize) {
                 console.log("Started game");
+
+                lobby.creeps = [];
+                lobby.buildings = [];
 
                 for (i = 0; i < lobbyKeys.length; i++) {
                     const ws_temp = lobby[lobbyKeys[i]];
@@ -189,52 +193,52 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         var building;
         for (building in changes.newBuildings)
         {
-            buildings.push(building);
+            lobby.buildings.push(building);
         }
         for (building in changes.changedBuilding)
         {
-            for (i = 0; i < buildings.length; i++)
+            for (i = 0; i < lobby.buildings.length; i++)
             {
-                if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+                if (lobby.buildings[i].xposition === building.xposition && lobby.buildings[i].yposition === building.yposition)
                 {
-                    buildings[i] = building;
+                    lobby.buildings[i] = building;
                     break;
                 }
             }
         }
         for (building in changes.removedBuilding)
         {
-            for (i = 0; i < buildings.length; i++)
+            for (i = 0; i < lobby.buildings.length; i++)
             {
-                if (buildings[i].xposition === building.xposition && buildings[i].yposition === building.yposition)
+                if (lobby.buildings[i].xposition === building.xposition && lobby.buildings[i].yposition === building.yposition)
                 {
-                    buildings.splice(i, i+1);
+                    lobby.buildings.splice(i, i+1);
                     break;
                 }
             }
         }
         for (creep in changes.newCreeps)
         {
-            creeps.push(creep);
+            lobby.creeps.push(creep);
         }
         for (creep in changes.changedCreeps)
         {
-            for (i = 0; i < creeps.length; i++)
+            for (i = 0; i < lobby.creeps.length; i++)
             {
-                if (creeps[i].creepID === creep.creepID)
+                if (lobby.creeps[i].creepID === creep.creepID)
                 {
-                    creeps[i] = creep;
+                    lobby.creeps[i] = creep;
                     break;
                 }
             }
         }
         for (creep in changes.removedCreeps)
         {
-            for (i = 0; i < creeps.length; i++)
+            for (i = 0; i < lobby.creeps.length; i++)
             {
-                if (creeps[i].creepID === creep.creepID)
+                if (lobby.creeps[i].creepID === creep.creepID)
                 {
-                    creeps.splice(i, i+1);
+                    lobby.creeps.splice(i, i+1);
                     break;
                 }
             }
@@ -242,8 +246,8 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         var objects = {};
         objects.playerInfo = false;
         objects.play = true;
-        objects.creeps = removeWorld(creeps);
-        objects.buildings = removeWorld(buildings);
+        objects.creeps = removeWorld(lobby.creeps);
+        objects.buildings = removeWorld(lobby.buildings);
         return JSON.stringify(objects);
     }
 
