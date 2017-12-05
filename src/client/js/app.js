@@ -45,17 +45,14 @@ const offenseTypes = [
 const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
-    ws.send("Assign Player");
+    console.log('Connected');
 };
 
 ws.onmessage = function(message) {
-    /*if (message === "Start")
-    {
-        play = true;
-        return;
-    }*/
     var changes = JSON.parse(message.data);
+
     console.log(message.data);
+
     if (changes.playerInfo === true)
     {
         world = new World(WIDTH, HEIGHT);
@@ -320,7 +317,13 @@ const onload = function () {
             removedCreeps : removeWorld(removedCreeps),
         };
 
-        ws.send(JSON.stringify(objects));
+        if (ws.readyState === WebSocket.READY) {
+            ws.send(JSON.stringify(objects));
+        }
+        else {
+            console.log('Done');
+        }
+
         newBuildings = [];
         changedBuildings = [];
         removedBuildings = [];
@@ -335,36 +338,7 @@ const onload = function () {
     setInitialState();
 
     Render.init();
-
-    ws.onmessage = function(message) {
-        var changes = JSON.parse(message.data);
-
-        console.log("Changes: ", changes);
-
-        if (changes.playerInfo === true)
-        {
-            world = new World(WIDTH, HEIGHT);
-            player = new Player(changes.xpos * WIDTH, changes.ypos * HEIGHT, world, changes.isDefense, 4);
-            if (changes.isDefense)
-            {
-                newBuildings.push(player.powerNode);
-                world.addBuilding(player.powerNode);
-            }
-        }
-        else
-        {
-            world.creeps = changes.creeps;
-            world.buildings = changes.buildings;
-            console.log(world.string);
-        }
-
-        play = changes.play;
-
-        if (changes.start) {
-            main(performance.now());
-        }
-    };
-
+    main(performance.now());
 };
 
 window.onload = function() {
