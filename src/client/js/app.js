@@ -40,15 +40,13 @@ const offenseTypes = [
     "MassimoSpawn",
 ];
 
-const ws = new WebSocket("ws://www.maxocull.com/vpd", {
-    perMessageDeflate: false,
-});
+const ws = new WebSocket("wss://maxocull.com:2701/");
 
-ws.on("open", function() {
+ws.onopen = function() {
     ws.send("Assign Player");
-});
+};
 
-ws.on("message", function(message) {
+ws.message = function(message) {
     var changes = JSON.parse(message.data);
     if (changes.playerInfo === true)
     {
@@ -67,7 +65,7 @@ ws.on("message", function(message) {
         console.log(world.string);
     }
     play = changes.play;
-});
+};
 
 window.onload = function() {
     const canvas = document.getElementById("canvas");

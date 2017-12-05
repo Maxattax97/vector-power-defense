@@ -61,3 +61,11 @@ $ mongo
 > db.accounts.find().pretty()
 ```
 
+
+## Websocket
+
+Test websocket
+
+```
+ws = new WebSocket('wss://maxocull.com:2701/'); ws.onopen = console.log; ws;
+```
