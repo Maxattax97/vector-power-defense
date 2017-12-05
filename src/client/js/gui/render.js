@@ -138,7 +138,7 @@ function render(world) {
     for (var i = 0; i < world.buildings.length; i++) {
         const building = world.buildings[i]
 
-        var color;
+        var color = "#ffffff";
         switch (building.buildingType)
         {
             case "BasicTower":
@@ -163,7 +163,9 @@ function render(world) {
         if (!rendering[id]) {
             console.log('render building', building);
             const tower = createTower(building.buildingLevel, color);
-            positionTower(tower, building.xposition, building.yposition);
+            const xpos = Math.round(building.xposition/16);
+            const ypos = Math.round(building.yposition/16);
+            positionTower(tower, xpos, ypos);
 
             rendering[building.id] = tower;
         }

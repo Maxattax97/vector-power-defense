@@ -221,7 +221,7 @@ const onload = function () {
     function queueUpdates(numTicks) {
         for (var i=0; i < numTicks; i++) {
             lastTick = lastTick + tickLength; //Now lastTick is this tick.
-            update(lastTick);
+            update(i, lastTick);
         }
     }
 
