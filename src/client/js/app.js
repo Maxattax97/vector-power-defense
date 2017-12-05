@@ -148,7 +148,8 @@ function promoteListener(e)
 
 (function () {
     function main(tFrame) {
-    //start = window.requestAnimationFrame(main);
+        // start = window.requestAnimationFrame(main);
+
         if (play === false)
         {
             return;

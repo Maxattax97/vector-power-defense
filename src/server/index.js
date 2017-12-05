@@ -106,7 +106,7 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
             console.log(`${lobbyKeys.length} players`);
 
             if (lobbyKeys.length >= lobbySize) {
-                console.log('Started game');
+                console.log("Started game");
 
                 for (i = 0; i < lobbyKeys.length; i++) {
                     const ws_temp = lobby[lobbyKeys[i]];
