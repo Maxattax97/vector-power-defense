@@ -40,13 +40,13 @@ const offenseTypes = [
     "MassimoSpawn",
 ];
 
-const ws = new WebSocket("wss://maxocull.com:2701/");
+const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
     ws.send("Assign Player");
 };
 
-ws.message = function(message) {
+ws.onmessage = function(message) {
     var changes = JSON.parse(message.data);
     if (changes.playerInfo === true)
     {
