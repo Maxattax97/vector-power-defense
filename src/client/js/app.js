@@ -243,12 +243,36 @@ function promote(e)
         world.calculatePathing();
     }
 
+    function addWorld(list) {
+        for (var i = 0; i < list.length; i++) {
+            list[i].map = world;
+        }
+        return list;
+    }
+
+    function removeWorld(list) {
+        const list2 = []
+        for (var i = 0; i < list.length; i++) {
+            list2[i] = Object.assign({}, list[i]);
+            delete list2[i].map;
+        }
+        return list2;
+    }
+
     function update(tick)
     {
         if (tick === 0)
         {
             return;
         }
+
+        addWorld(newBuildings);
+        addWorld(changedBuildings);
+        addWorld(removedBuildings);
+        addWorld(newCreeps);
+        addWorld(changedCreeps);
+        addWorld(removedCreeps);
+
         var creep;
         var tower;
         var spawner;
@@ -293,14 +317,15 @@ function promote(e)
 
         var objects =
         {
-            "newBuildings" : newBuildings,
-            "changedBuildings" : changedBuildings,
-            "removedBuildings" : removedBuildings,
-            "newCreeps" : newCreeps,
-            "changedCreeps" : changedCreeps,
-            "removedCreeps" : removedCreeps,
+            newBuildings : removeWorld(newBuildings),
+            changedBuildings : removeWorld(changedBuildings),
+            removedBuildings : removeWorld(removedBuildings),
+            newCreeps : removeWorld(newCreeps),
+            changedCreeps : removeWorld(changedCreeps),
+            removedCreeps : removeWorld(removedCreeps),
         };
-        ws.send(JSON.stringify(Util.inspect(objects)));
+
+        ws.send(JSON.stringify(objects));
         newBuildings = [];
         changedBuildings = [];
         removedBuildings = [];
@@ -314,4 +339,34 @@ function promote(e)
 
     setInitialState();
     main(performance.now()); // Start the cycle
+
+    ws.onmessage = function(message) {
+        var changes = JSON.parse(message.data);
+
+        console.log("Changes: ", changes);
+
+        if (changes.playerInfo === true)
+        {
+            world = new World(WIDTH, HEIGHT);
+            player = new Player(changes.xpos * WIDTH, changes.ypos * HEIGHT, world, changes.isDefense, 4);
+            if (changes.isDefense)
+            {
+                newBuildings.push(player.powerNode);
+                world.addBuilding(player.powerNode);
+            }
+        }
+        else
+        {
+            world.creeps = changes.creeps;
+            world.buildings = changes.buildings;
+            console.log(world.string);
+        }
+
+        play = changes.play;
+
+        if (changes.start) {
+            main(performance.now());
+        }
+    };
+
 })();

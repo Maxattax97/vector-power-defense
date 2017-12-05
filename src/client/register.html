@@ -16,10 +16,18 @@
       }
 
       window.onload = function() {
-        var failed = getParameterByName("fail");
+        var message = getParameterByName("msg");
+        var color = getParameterByName("color");
 
-        if (failed == "true") {
-          document.getElementById("failBanner").style.display = "inline";
+        if (message) {
+          var messageElem = document.getElementById("message");
+          messageElem.innerHTML = message;
+
+          if (color) {
+            messageElem.style.color = color;
+          }
+
+          messageElem.style.display = "inline";
         }
       };
     </script>
@@ -38,7 +46,7 @@
       <!--<div class="g-recaptcha" data-sitekey="6LcuYjsUAAAAABh-scJ8BfROE1jOvwZJ6zBdc3wI"></div>-->
       <input type="submit" value="Register" />
     </form>
-    <span id="failBanner" style="display: none;">
+    <span id="message" style="display: none;">
       Login Failed
     </span>
   </body>
