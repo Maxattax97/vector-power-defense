@@ -116,21 +116,18 @@ class DefenseTower extends Building
                 minCreep = creep;
             }
         }
-        if (minCreep === null)
-        {
-            this.cooldown = FIRE - this.rate;
-            return null;
-        }
-        if (minDistance <= this.range) {
+        if ((minCreep) && minDistance <= this.range) {
             minCreep.currHealth -= this.damage;
 
             if (minCreep.currHealth <= 0) {
                 minCreep.perish();
-                return minCreep;
             }
-            else {
-                return null;
-            }
+            return minCreep;
+        }
+        else
+        {
+            this.cooldown = FIRE - this.rate;
+            return null;
         }
     }
 }

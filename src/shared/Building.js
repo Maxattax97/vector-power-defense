@@ -25,6 +25,11 @@ class Building
         this.map = map;
     }
 
+    get string()
+    {
+        return ("Type: " + this.buildingType + " X: " + this.xposition + " Y: " + this.yposition); 
+    }
+
     upgrade(resources)
     {
         if (resources >= this.upgradeCost)

@@ -97,6 +97,11 @@ class Creep
         return (this.baseSpeed * (1 + (this.creepLevel * this.multSpeed)));
     }
 
+    get string()
+    {
+        return "Type: " + this.creepType + "ID: " + this.creepID;
+    }
+
     // Function to deal damage to a building in range
     attack(powerNode)
     {

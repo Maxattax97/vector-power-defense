@@ -15,6 +15,8 @@ const SWARMCOST = 200;
 const ROTUNDCOST = 250;
 const MASSCOST = 300;
 
+const INCOMEDELAY = 10;
+
 class Player
 {
     /*
@@ -24,6 +26,7 @@ class Player
     Boolean isDefense       :: Whether the player is a defender or not.
     Tile[] map              :: Map instance that player is playing with.
     CreepID idCounter       :: Counter for assigning ids for offensive player's creeps
+    Integer incomeTick
     */
 
     constructor(xpos, ypos, map, isDefense, numDefenders)
@@ -31,6 +34,7 @@ class Player
         this.resources = 0;
         this.buildings = [];
         this.map = map;
+        this.incomeTick = 0;
         if (isDefense)
         {
             this.powerNode = new PowerNode(xpos, ypos, this.map, numDefenders);
@@ -181,6 +185,26 @@ class Player
     promoteSpawner(spawner)
     {
         this.resources = spawner.promote(this.resources);
+    }
+
+    receiveIncome()
+    {
+        if (this.incomeTick < INCOMEDELAY)
+        {
+            this.incomeTick++;
+            return;
+        }
+        if (this.isDefense)
+        {
+            this.resources += this.powerNode.income;
+        }
+        else
+        {
+            for (var spawner in this.buildings)
+            {
+                this.resources += spawner.income;
+            }
+        }
     }
 }
 
