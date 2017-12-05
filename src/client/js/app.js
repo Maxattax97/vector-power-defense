@@ -45,7 +45,37 @@ const offenseTypes = [
 const ws = new WebSocket("wss://" + location.host);
 
 ws.onopen = function() {
-    console.log("Connection established");
+    ws.send("Assign Player");
+};
+
+ws.onmessage = function(message) {
+    /*if (message === "Start")
+    {
+        play = true;
+        return;
+    }*/
+    var changes = JSON.parse(message.data);
+    console.log(message.data);
+    if (changes.playerInfo === true)
+    {
+        world = new World(WIDTH, HEIGHT);
+        for (var x = 0; x < WIDTH; x++)
+        {
+            buildMap[x] = [];
+        }
+        player = new Player(Math.round(changes.xpos * WIDTH), Math.round(changes.ypos * HEIGHT), world, changes.isDefense, 4);
+        if (changes.isDefense)
+        {
+            newBuildings.push(player.powerNode);
+            world.addBuilding(player.powerNode);
+        }
+    }
+    else
+    {
+        world.creeps = changes.creeps;
+        world.buildings = changes.buildings;
+    }
+    play = true;
 };
 
 window.addEventListener("keypress", function(e){
@@ -121,6 +151,7 @@ window.addEventListener("click", function(e){
             if ((building))
             {
                 world.addBuilding(building);
+                console.log(building.string);
                 newBuildings.push(building);
                 for (var x = building.xposition; x < building.xposition + BUILDSIZE; x++)
                 {
@@ -245,6 +276,7 @@ const onload = function () {
         {
             for (tower in player.buildings)
             {
+                console.log(tower.buildingType);
                 target = tower.attack(world.creeps);
                 if (target !== null)
                 {
