@@ -2,7 +2,6 @@
 const paper = require("paper");
 const Player = require("../../shared/Player");
 const World = require("../../shared/World");
-const WebSocket = require("ws");
 const Render = require("./gui/render");
 //const World = require("../../shared/World");
 
