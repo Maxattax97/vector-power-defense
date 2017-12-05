@@ -10,7 +10,6 @@ const ObjectID = mongodb.ObjectID;
 const express = require("express");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
 //init Express Router
@@ -296,8 +295,6 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
         trySaveSessionStore(req.sessionStore);
 
         if (req.body && req.body.email && req.body.username && req.body.password) {
-            // TODO: Check that username and email are not yet in use.
-
             var iterations = 100000;
             crypto.randomBytes(128, function(err, saltBuf) {
                 crypto.pbkdf2(req.body.password, saltBuf, iterations, 256, "sha256", function(err, passHash) {
@@ -307,31 +304,25 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
                             return;
                         }
 
-                        console.log({
-                            email: req.body.email,
-                            username: req.body.username,
-                            iterations: iterations,
-                            salt: saltBuf.toString("hex"),
-                            hash: passHash.toString("hex"),
-                            statistics: {
-                                highscore: 0,
-                            },
-                        });
-
-                        col.insertOne({
-                            email: req.body.email,
-                            username: req.body.username,
-                            iterations: iterations,
-                            salt: saltBuf.toString("hex"),
-                            hash: passHash.toString("hex"),
-                            statistics: {
-                                highscore: 0,
-                            },
-                        }, {}).then(function() {
-                            console.log("Sucesfully created a new account for " + req.body.username);
-                            res.redirect("/?msg=Account+Created&color=green");
-                        }).catch(function(err) {
-                            console.error(err);
+                        checkExistingAccount(req.body.username, req.body.email).then(function() {
+                            col.insertOne({
+                                email: req.body.email,
+                                username: req.body.username,
+                                iterations: iterations,
+                                salt: saltBuf.toString("hex"),
+                                hash: passHash.toString("hex"),
+                                statistics: {
+                                    highscore: 0,
+                                },
+                            }, {}).then(function() {
+                                console.log("Sucesfully created a new account for " + req.body.username);
+                                res.redirect("/?msg=Account+Created&color=green");
+                            }).catch(function(err) {
+                                console.error(err);
+                                res.redirect("/egister?msg=Internal+Error&color=red");
+                            });
+                        }).catch(function() {
+                            res.redirect("/register?msg=Account+Exists&color=red");
                         });
                     });
                 });
@@ -371,13 +362,10 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
     function shutdown() {
         if (shutdownMutex <= 0) {
             shutdownMutex = 1;
-            console.log("MongoDB closing ...");
+            console.log("Server shutting down ...");
             db.close();
-            console.log("HTTPS server closing ...");
             httpsServer.close();
-            console.log("HTTP redirect server closing ...");
             redirectServer.close();
-            console.log("WS server closing ...");
             wss.close();
             console.log("Shutdown process complete");
             shutdownMutex = 2;
@@ -390,6 +378,29 @@ MongoClient.connect("mongodb://localhost:27017/vpd").then(function(db) {
             console.log("Fetched and saved reference to session store");
             console.log(sessionStore);
         }
+    }
+
+    function checkExistingAccount(username, email) {
+        return new Promise(function(resolve, reject) {
+            db.collection("accounts", {}, function(err, col) {
+                if (err) {
+                    reject(err);
+                }
+
+                col.find({$or: [
+                    {username: username},
+                    {email: email},
+                ]}).toArray(function(err, docs) {
+                    if (err) {
+                        reject(err);
+                    } else if (docs.length > 0) {
+                        reject(docs);
+                    } else {
+                        resolve(false);
+                    }
+                });
+            });
+        });
     }
 
     process.on("SIGINT", shutdown);
