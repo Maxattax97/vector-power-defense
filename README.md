@@ -6,15 +6,24 @@ Server and client code for the epic CS 252 tower defense project.
 
 Resources accumulate over time. With sufficient resources, you can:
 
+
 Hold 1 and click: Build normal tower
+
 Hold 2 and click: Build rapid shooting tower/ fast enemy spawner
+
 Hold 3 and click: Build splash damage tower/ swarm enemy spawner
+
 Hold 4 and click: Build high damage tower/ strong enemy spawner
+
 Hold 5 and click: Build best tower/ strongest enemy spawner
 
+
 Hold S and click: Sell tower clicked
+
 Hold U and click: Upgrade tower clicked
+
 Hold P and click: Promote spawner clicked to boss spawner
+
 
 ## Setup
 
