@@ -8,8 +8,10 @@ The idea for this game is a tower defense game where one person places spawning 
 
 ## Instructions
 
+Video help: https://youtu.be/N0kckz1gJCk
+
  1. Create an account or login using Username: a, Password: a.
- 2. Create another window and bring up the game in another window (the link should be "https://maxocull.com:2701/game")
+ 2. Create another window and bring up the game in another window (the link should be https://maxocull.com:2701/game)
  3. At the bottom, the words "Game has started" should appear.
  4. Use the controls listed below to place towers.
 
