@@ -2,7 +2,17 @@
 
 Server and client code for the epic CS 252 tower defense project.
 
+## Implemente
+
+The idea for this game is a tower defense game where one person places spawning buildings and the other person places shooter buildings, like a multi-player tower defense game. We were able to implement the login system and game-syncing system, but not much of the game itself.
+
 ## Instructions
+
+ 1. Create an account or login using Username: a, Password: a.
+ 2. Create another window and bring up the game in another window (the link should be "https://maxocull.com:2701/game")
+ 3. At the bottom, the words "Game has started" should appear.
+ 4. Use the controls listed below to place towers.
+
 
 Resources accumulate over time. With sufficient resources, you can:
 
@@ -16,7 +26,6 @@ Hold 3 and click: Build splash damage tower/ swarm enemy spawner
 Hold 4 and click: Build high damage tower/ strong enemy spawner
 
 Hold 5 and click: Build best tower/ strongest enemy spawner
-
 
 Hold S and click: Sell tower clicked
 
